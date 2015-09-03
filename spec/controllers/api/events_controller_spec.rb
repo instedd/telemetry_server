@@ -6,6 +6,7 @@ RSpec.describe Api::EventsController, :type => :controller do
 
   before :each do
     @request.env['RAW_POST_DATA'] = event_data
+    allow(IndexEventJob).to receive(:perform_later)
   end
 
   context 'new installation' do

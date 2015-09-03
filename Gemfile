@@ -27,6 +27,8 @@ gem 'haml-rails', '~> 0.9'
 
 gem 'rest-client'
 
+gem 'elasticsearch'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

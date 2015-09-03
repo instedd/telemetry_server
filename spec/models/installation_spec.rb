@@ -37,6 +37,4 @@ RSpec.describe Installation, type: :model do
       installation.save!
     end
   end
-
-
 end
