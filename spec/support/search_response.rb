@@ -8,6 +8,6 @@ class SearchResponse
   end
 
   def results
-    @response['hits']['hits'].map{|x| x['_source']}
+    @response['hits']['hits'].map{|x| x['_source'].merge('_id' => x['_id'])}
   end
 end

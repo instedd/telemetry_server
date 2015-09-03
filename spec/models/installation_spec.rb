@@ -37,4 +37,21 @@ RSpec.describe Installation, type: :model do
       installation.save!
     end
   end
+
+  describe 'index' do
+    it 'indexes using job when creating' do
+      expect(IndexInstallationJob).to receive(:perform_later)
+
+      create(:installation, ip: nil)
+    end
+
+    it 'indexes using job when updating' do
+      installation = create(:installation)
+
+      installation.last_reported_at = Time.now.utc
+      expect(IndexInstallationJob).to receive(:perform_later)
+
+      installation.save
+    end
+  end
 end

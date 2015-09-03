@@ -1,6 +1,8 @@
 RSpec.shared_context 'elasticseach', elasticseach: true do
   before(:each) do
     ElasticsearchService.client.indices.delete index: ElasticsearchService.index_name rescue nil
+    ElasticsearchService.create_index
+    ElasticsearchService.init_mappings
   end
 
   def refresh_index
@@ -14,6 +16,11 @@ RSpec.shared_context 'elasticseach', elasticseach: true do
 
   def search_sets
     response = ElasticsearchService.client.search index: ElasticsearchService.index_name, type: 'set', body: { query: { match_all: {} } }
+    SearchResponse.new(response)
+  end
+
+  def search_installations
+    response = ElasticsearchService.client.search index: ElasticsearchService.index_name, type: 'installation', body: { query: { match_all: {} } }
     SearchResponse.new(response)
   end
 end
