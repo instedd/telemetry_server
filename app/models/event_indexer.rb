@@ -23,7 +23,7 @@ class EventIndexer
         kind: counter['type'],
         key: counter['key'],
         value: counter['value'],
-        beggining: period['beggining'],
+        beginning: period['beginning'],
         end: period['end']
       })
     end
@@ -42,7 +42,7 @@ class EventIndexer
         kind: set['type'],
         key: set['key'],
         elements: set['elements'],
-        beggining: period['beggining'],
+        beginning: period['beginning'],
         end: period['end']
       })
     end
