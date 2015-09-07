@@ -54,4 +54,19 @@ RSpec.describe Installation, type: :model do
       installation.save
     end
   end
+
+  describe 'last reported at' do
+    let(:now) { Time.now.utc }
+    let(:installation) { create(:installation) }
+
+    before :each do
+      Timecop.freeze(now)
+    end
+
+    it 'updates last reported at' do
+      installation.touch_last_reported_at!
+
+      expect(installation.reload.last_reported_at).to eq(now)
+    end
+  end
 end

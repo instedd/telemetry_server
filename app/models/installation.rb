@@ -7,6 +7,11 @@ class Installation < ActiveRecord::Base
   after_save :geocode
   after_save :index_installation
 
+  def touch_last_reported_at!
+    self.last_reported_at = Time.now.utc
+    self.save
+  end
+
   private
 
   def geocode

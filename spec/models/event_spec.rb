@@ -17,4 +17,11 @@ RSpec.describe Event, type: :model do
       create(:event, data: nil)
     end
   end
+
+  it 'updates installation last reported at' do
+    installation = create(:installation)
+    expect(installation).to receive(:touch_last_reported_at!)
+
+    create(:event, installation: installation)
+  end
 end

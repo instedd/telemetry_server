@@ -4,10 +4,15 @@ class Event < ActiveRecord::Base
   validates :installation, presence: true
 
   after_create :index_event
+  after_create :touch_installation
 
   private
 
   def index_event
     IndexEventJob.perform_later(self.id) if self.data.present?
+  end
+
+  def touch_installation
+    self.installation.touch_last_reported_at!
   end
 end
