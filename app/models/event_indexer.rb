@@ -13,11 +13,10 @@ class EventIndexer
   private
 
   def index_counters(event, period, counters)
-    index_data = {index: {_type: 'counter'}}
     bulk_data = []
 
-    counters.each do |counter|
-      bulk_data.push index_data
+    counters.each_with_index do |counter, i|
+      bulk_data.push({index: {_type: 'counter', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
         kind: counter['type'],
@@ -32,11 +31,10 @@ class EventIndexer
   end
 
   def index_sets(event, period, sets)
-    index_data = {index: {_type: 'set'}}
     bulk_data = []
 
-    sets.each do |set|
-      bulk_data.push index_data
+    sets.each_with_index do |set, i|
+      bulk_data.push({index: {_type: 'set', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
         kind: set['type'],

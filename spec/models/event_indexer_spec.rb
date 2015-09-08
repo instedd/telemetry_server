@@ -18,7 +18,7 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
       period: {beginning: from.iso8601, end: to.iso8601}
     }.to_json
   end
-  let(:event) { build(:event, installation: installation, data: data)}
+  let(:event) { create(:event, installation: installation, data: data)}
   let(:indexer) { EventIndexer.new }
 
   it 'should index counters' do
@@ -34,11 +34,13 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     users_result = results.find{|x| x['kind'] == 'users'}
     calls_result = results.find{|x| x['kind'] == 'calls'}
 
+    expect(users_result['_id']).to eq("#{event.id}-0")
     expect(users_result['key']['project_id']).to eq(5)
     expect(users_result['value']).to eq(11)
     expect(users_result['beginning']).to eq(from.iso8601)
     expect(users_result['end']).to eq(to.iso8601)
 
+    expect(calls_result['_id']).to eq("#{event.id}-1")
     expect(calls_result['key']['project_id']).to eq(3)
     expect(calls_result['value']).to eq(17)
     expect(calls_result['beginning']).to eq(from.iso8601)
@@ -58,11 +60,13 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     languages_result = results.find{|x| x['kind'] == 'languages'}
     channels_result = results.find{|x| x['kind'] == 'channels'}
 
+    expect(languages_result['_id']).to eq("#{event.id}-0")
     expect(languages_result['key']['project_id']).to eq(7)
     expect(languages_result['elements']).to eq(['en', 'es', 'jp'])
     expect(languages_result['beginning']).to eq(from.iso8601)
     expect(languages_result['end']).to eq(to.iso8601)
 
+    expect(channels_result['_id']).to eq("#{event.id}-1")
     expect(channels_result['key']['project_id']).to eq(23)
     expect(channels_result['elements']).to eq(['twilio', 'sip', 'callcentric'])
     expect(channels_result['beginning']).to eq(from.iso8601)
