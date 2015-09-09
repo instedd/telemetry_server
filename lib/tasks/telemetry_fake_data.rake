@@ -78,19 +78,22 @@ namespace :telemetry do
         call_flows_per_project_stats,
         languages_per_project_stats,
         project_count_stats,
+        project_lifespan_stats,
         steps_per_call_flow_stats
       ]
 
       base = {
         "period" => { "beginning" => period.iso8601, "end" => (period + 1.week).iso8601 },
         "counters" => [],
-        "sets" => []
+        "sets" => [],
+        "timespans" => []
       }
 
       all_stats.inject(base) do |result, stats|
         result.tap do |r|
-          r["counters"].concat(stats["counters"]) if stats["counters"]
-          r["sets"].concat(stats["sets"])         if stats["sets"]
+          r["counters"].concat(stats["counters"])           if stats["counters"]
+          r["sets"].concat(stats["sets"])                   if stats["sets"]
+          r["timespans"].concat(stats["timespans"])         if stats["timespans"]
         end
       end
     end
@@ -131,6 +134,18 @@ namespace :telemetry do
       }
     end
 
+    def project_lifespan_stats
+      {
+        "timespans" => @projects.map { |project|
+          {
+            "kind" => "project_lifespan",
+            "key" => { "project_id" => project.id },
+            "days" => project.lifespan
+          }
+        }
+      }
+    end
+
     def steps_per_call_flow_stats
       {
         "counters" => @projects.flat_map { |project|
@@ -157,12 +172,14 @@ namespace :telemetry do
     attr_reader :id
     attr_reader :languages
     attr_reader :call_flows
+    attr_reader :lifespan
 
     def initialize(instance)
       @instance = instance
       @id = instance.new_project_id
       @languages = ALL_LANGUAGES.sample(1 + rand(2))
       @call_flows = (0..rand(5)).map { create_flow }
+      @lifespan = rand(5)
     end
 
     def create_flow
@@ -173,6 +190,8 @@ namespace :telemetry do
     end
 
     def advance_state
+      @lifespan += rand(14)
+
       call_flows.each do |flow|
         languages.concat(ALL_LANGUAGES.sample(1)).uniq! if rand(30) == 0
         flow[:step_count] += rand(2)
