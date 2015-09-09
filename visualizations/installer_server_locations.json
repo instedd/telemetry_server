@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "Installation-map",
+    "_type": "visualization",
+    "_source": {
+      "title": "Installed server locations",
+      "visState": "{\n  \"type\": \"tile_map\",\n  \"params\": {\n    \"mapType\": \"Scaled Circle Markers\",\n    \"isDesaturated\": true,\n    \"heatMaxZoom\": 16,\n    \"heatMinOpacity\": 0.1,\n    \"heatRadius\": 25,\n    \"heatBlur\": 15,\n    \"heatNormalizeData\": true,\n    \"addTooltip\": true\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"type\": \"count\",\n      \"schema\": \"metric\",\n      \"params\": {}\n    },\n    {\n      \"id\": \"2\",\n      \"type\": \"geohash_grid\",\n      \"schema\": \"segment\",\n      \"params\": {\n        \"field\": \"location\",\n        \"autoPrecision\": true,\n        \"mapZoom\": 2,\n        \"mapCenter\": [\n          10.574222078332806,\n          -30.585937499999996\n        ],\n        \"precision\": 2\n      }\n    }\n  ],\n  \"listeners\": {}\n}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\n  \"index\": \"telemetry-dev*\",\n  \"query\": {\n    \"query_string\": {\n      \"analyze_wildcard\": true,\n      \"query\": \"_type: installation\"\n    }\n  },\n  \"filter\": []\n}"
+      }
+    }
+  }
+]
