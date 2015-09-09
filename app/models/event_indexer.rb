@@ -7,7 +7,8 @@ class EventIndexer
     data = JSON.parse(event.data)
     counters_data = index_counters event, data['period'], data['counters'] || []
     sets_data = index_sets event, data['period'], data['sets'] || []
-    bulk_index counters_data.concat(sets_data)
+    timespans_data = index_timespans event, data['period'], data['timespans'] || []
+    bulk_index counters_data.concat(sets_data).concat(timespans_data)
   end
 
   private
@@ -40,6 +41,24 @@ class EventIndexer
         kind: set['type'],
         key: set['key'],
         elements: set['elements'],
+        beginning: period['beginning'],
+        end: period['end']
+      })
+    end
+
+    bulk_data
+  end
+
+  def index_timespans(event, period, timespans)
+    bulk_data = []
+
+    timespans.each_with_index do |set, i|
+      bulk_data.push({index: {_type: 'timespan', _id: "#{event.id}-#{i}"}})
+      bulk_data.push({
+        installation_uuid: event.installation.uuid,
+        kind: set['type'],
+        key: set['key'],
+        days: set['days'],
         beginning: period['beginning'],
         end: period['end']
       })

@@ -15,6 +15,10 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
         {type: 'languages', key: {project_id: 7}, elements: ['en', 'es', 'jp']},
         {type: 'channels', key: {project_id: 23}, elements: ['twilio', 'sip', 'callcentric']}
       ],
+      timespans: [
+        {type: 'user_lifespan', key: {user_id: 46}, days: 14},
+        {type: 'project_lifespan', key: {project_id: 34}, days: 30}
+      ],
       period: {beginning: from.iso8601, end: to.iso8601}
     }.to_json
   end
@@ -71,6 +75,32 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(channels_result['elements']).to eq(['twilio', 'sip', 'callcentric'])
     expect(channels_result['beginning']).to eq(from.iso8601)
     expect(channels_result['end']).to eq(to.iso8601)
+  end
+
+  it "should index timespans" do
+    indexer.index(event)
+
+    refresh_index
+
+    response = search_timespans
+
+    expect(response.total).to eq(2)
+
+    results = response.results
+    user_lifespan_result = results.find{|x| x['kind'] == 'user_lifespan'}
+    project_lifespan_result = results.find{|x| x['kind'] == 'project_lifespan'}
+
+    expect(user_lifespan_result['_id']).to eq("#{event.id}-0")
+    expect(user_lifespan_result['key']['user_id']).to eq(46)
+    expect(user_lifespan_result['days']).to eq(14)
+    expect(user_lifespan_result['beginning']).to eq(from.iso8601)
+    expect(user_lifespan_result['end']).to eq(to.iso8601)
+
+    expect(project_lifespan_result['_id']).to eq("#{event.id}-1")
+    expect(project_lifespan_result['key']['project_id']).to eq(34)
+    expect(project_lifespan_result['days']).to eq(30)
+    expect(project_lifespan_result['beginning']).to eq(from.iso8601)
+    expect(project_lifespan_result['end']).to eq(to.iso8601)
   end
 
 end

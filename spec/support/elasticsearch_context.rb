@@ -19,6 +19,11 @@ RSpec.shared_context 'elasticseach', elasticseach: true do
     SearchResponse.new(response)
   end
 
+  def search_timespans
+    response = ElasticsearchService.client.search index: ElasticsearchService.index_name, type: 'timespan', body: { query: { match_all: {} } }
+    SearchResponse.new(response)
+  end
+
   def search_installations
     response = ElasticsearchService.client.search index: ElasticsearchService.index_name, type: 'installation', body: { query: { match_all: {} } }
     SearchResponse.new(response)
