@@ -20,7 +20,7 @@ class EventIndexer
       bulk_data.push({index: {_type: 'counter', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
-        kind: counter['type'],
+        kind: counter['kind'],
         key: counter['key'],
         value: counter['value'],
         beginning: period['beginning'],
@@ -38,7 +38,7 @@ class EventIndexer
       bulk_data.push({index: {_type: 'set', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
-        kind: set['type'],
+        kind: set['kind'],
         key: set['key'],
         elements: set['elements'],
         beginning: period['beginning'],
@@ -56,7 +56,7 @@ class EventIndexer
       bulk_data.push({index: {_type: 'timespan', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
-        kind: set['type'],
+        kind: set['kind'],
         key: set['key'],
         days: set['days'],
         beginning: period['beginning'],

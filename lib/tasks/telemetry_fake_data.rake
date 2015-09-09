@@ -99,7 +99,7 @@ namespace :telemetry do
       {
         "counters" => @projects.map { |project|
           {
-            "type" => "call_flows",
+            "kind" => "call_flows",
             "key" => { "project_id" => project.id },
             "value" => project.call_flows.length
           }
@@ -111,7 +111,7 @@ namespace :telemetry do
       {
         "sets" => @projects.map { |project|
           {
-            "type" => "languages",
+            "kind" => "languages",
             "key" => { "project_id" => project.id },
             "elements" => project.languages
           }
@@ -123,7 +123,7 @@ namespace :telemetry do
       {
         "counters" => [
           {
-            "type" => "projects",
+            "kind" => "projects",
             "key" => {},
             "value" => @projects.length
           }
@@ -136,7 +136,7 @@ namespace :telemetry do
         "counters" => @projects.flat_map { |project|
           project.call_flows.map { |call_flow|
             {
-              "type" => "steps",
+              "kind" => "steps",
               "key" => { "call_flow" => call_flow[:id] },
               "value" => call_flow[:step_count]
             }

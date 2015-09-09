@@ -8,16 +8,16 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
   let(:data) do
     {
       counters: [
-        {type: 'users', key: {project_id: 5}, value: 11},
-        {type: 'calls', key: {project_id: 3}, value: 17}
+        {kind: 'users', key: {project_id: 5}, value: 11},
+        {kind: 'calls', key: {project_id: 3}, value: 17}
       ],
       sets: [
-        {type: 'languages', key: {project_id: 7}, elements: ['en', 'es', 'jp']},
-        {type: 'channels', key: {project_id: 23}, elements: ['twilio', 'sip', 'callcentric']}
+        {kind: 'languages', key: {project_id: 7}, elements: ['en', 'es', 'jp']},
+        {kind: 'channels', key: {project_id: 23}, elements: ['twilio', 'sip', 'callcentric']}
       ],
       timespans: [
-        {type: 'user_lifespan', key: {user_id: 46}, days: 14},
-        {type: 'project_lifespan', key: {project_id: 34}, days: 30}
+        {kind: 'user_lifespan', key: {user_id: 46}, days: 14},
+        {kind: 'project_lifespan', key: {project_id: 34}, days: 30}
       ],
       period: {beginning: from.iso8601, end: to.iso8601}
     }.to_json
