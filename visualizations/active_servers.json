@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "Active-servers",
+    "_type": "visualization",
+    "_source": {
+      "title": "Active servers",
+      "visState": "{\"type\":\"metric\",\"params\":{\"fontSize\":60},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"telemetry-dev*\",\"query\":{\"query_string\":{\"query\":\"_type: installation AND last_reported_at: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]
