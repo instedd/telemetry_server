@@ -54,8 +54,7 @@ namespace :telemetry do
     def initialize
       @project_id_seq = 0
       @call_flow_id_seq = 0
-      @latitude  = LOCATIONS.sample[0]
-      @longitude = LOCATIONS.sample[1]
+      @latitude, @longitude  = LOCATIONS.sample
 
       @uuid = SecureRandom.uuid
       @projects = (1..100).map { create_project }
