@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "Project-lifespan-histogram",
+    "_type": "visualization",
+    "_source": {
+      "title": "Project lifespan histogram",
+      "visState": "{\"type\":\"histogram\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"scale\":\"linear\",\"mode\":\"grouped\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"spyPerPage\":10},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"days\",\"interval\":30,\"extended_bounds\":{}}}],\"listeners\":{}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"telemetry-*\",\"query\":{\"query_string\":{\"query\":\"kind: project_lifespan AND beginning: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]

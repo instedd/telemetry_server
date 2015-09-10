@@ -52,16 +52,21 @@ namespace :telemetry do
     attr_reader :longitude
 
     def initialize
+      @user_id_seq = 0
       @project_id_seq = 0
       @call_flow_id_seq = 0
       @latitude, @longitude  = LOCATIONS.sample
 
       @uuid = SecureRandom.uuid
-      @projects = (1..100).map { create_project }
+      @users = (1..10).map { create_user }
     end
 
-    def create_project
-      FakeProject.new(self)
+    def create_user
+      FakeUser.new(self)
+    end
+
+    def new_user_id
+      @user_id_seq+=1
     end
 
     def new_project_id
@@ -74,6 +79,7 @@ namespace :telemetry do
 
     def current_stats(period)
       all_stats = [
+        user_lifespan_stats,
         call_flows_per_project_stats,
         languages_per_project_stats,
         project_count_stats,
@@ -97,9 +103,13 @@ namespace :telemetry do
       end
     end
 
+    def all_projects
+      @users.flat_map(&:projects)
+    end
+
     def call_flows_per_project_stats
       {
-        "counters" => @projects.map { |project|
+        "counters" => all_projects.map { |project|
           {
             "kind" => "call_flows",
             "key" => { "project_id" => project.id },
@@ -111,7 +121,7 @@ namespace :telemetry do
 
     def languages_per_project_stats
       {
-        "sets" => @projects.map { |project|
+        "sets" => all_projects.map { |project|
           {
             "kind" => "languages",
             "key" => { "project_id" => project.id },
@@ -127,15 +137,27 @@ namespace :telemetry do
           {
             "kind" => "projects",
             "key" => {},
-            "value" => @projects.length
+            "value" => all_projects.length
           }
         ]
       }
     end
 
+    def user_lifespan_stats
+      {
+        "timespans" => @users.map { |user|
+          {
+            "kind" => "user_lifespan",
+            "key" => { "user_id" => user.id },
+            "days" => user.lifespan
+          }
+        }
+      }
+    end
+
     def project_lifespan_stats
       {
-        "timespans" => @projects.map { |project|
+        "timespans" => all_projects.map { |project|
           {
             "kind" => "project_lifespan",
             "key" => { "project_id" => project.id },
@@ -147,7 +169,7 @@ namespace :telemetry do
 
     def steps_per_call_flow_stats
       {
-        "counters" => @projects.flat_map { |project|
+        "counters" => all_projects.flat_map { |project|
           project.call_flows.map { |call_flow|
             {
               "kind" => "steps",
@@ -160,8 +182,32 @@ namespace :telemetry do
     end
 
     def advance_state
+      @users.each(&:advance_state)
+      rand(4).times { @users << create_user }
+    end
+
+  end
+
+  class FakeUser
+    attr_reader :id
+    attr_reader :projects
+    attr_reader :lifespan
+
+    def initialize(instance)
+      @id = instance.new_user_id
+      @instance = instance
+      @projects = (0..rand(2)).map { create_project }
+      @lifespan = rand(10)
+    end
+
+    def create_project
+      FakeProject.new(@instance, self)
+    end
+
+    def advance_state
+      @lifespan += rand(14)
       @projects.each(&:advance_state)
-      rand(4).times { @projects << create_project }
+      rand(1).times { @projects << create_project }
     end
 
   end
@@ -173,8 +219,10 @@ namespace :telemetry do
     attr_reader :call_flows
     attr_reader :lifespan
 
-    def initialize(instance)
+    def initialize(instance, user)
       @instance = instance
+      @user = user
+      
       @id = instance.new_project_id
       @languages = ALL_LANGUAGES.sample(1 + rand(2))
       @call_flows = (0..rand(5)).map { create_flow }

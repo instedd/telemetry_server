@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "User-lifespan-histogram",
+    "_type": "visualization",
+    "_source": {
+      "title": "User lifespan histogram",
+      "visState": "{\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"defaultYExtents\":false,\"mode\":\"stacked\",\"scale\":\"linear\",\"setYExtents\":false,\"shareYAxis\":true,\"times\":[],\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"days\",\"interval\":30,\"extended_bounds\":{}}}],\"listeners\":{}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"telemetry-*\",\"query\":{\"query_string\":{\"query\":\"kind: user_lifespan AND beginning: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]
