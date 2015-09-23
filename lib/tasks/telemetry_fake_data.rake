@@ -194,7 +194,8 @@ namespace :telemetry do
         languages_per_project_stats,
         project_count_stats,
         project_lifespan_stats,
-        steps_per_call_flow_stats
+        steps_per_call_flow_stats,
+        calls_per_day_stats
       ]
 
       build_event(all_stats, period)
@@ -278,6 +279,22 @@ namespace :telemetry do
       }
     end
 
+    def calls_per_day_stats
+      {
+        "counters" => all_projects.flat_map { |project|
+          grouped_calls = project.call_logs.group_by{ |call_flow| [call_flow[:channel_id], call_flow[:date], call_flow[:state]] }
+
+          grouped_calls.map do |key, flows|
+            {
+              "kind" => "calls",
+              "key" => { "channel_id" => key[0], "date" => key[1], "state" => key[2] },
+              "value" => flows.length
+            }
+          end
+        }
+      }
+    end
+
     def advance_state
       @users.each(&:advance_state)
       rand(4).times { @users << create_user }
@@ -314,6 +331,7 @@ namespace :telemetry do
     attr_reader :id
     attr_reader :languages
     attr_reader :call_flows
+    attr_reader :channels
     attr_reader :lifespan
 
     def initialize(instance, user)
@@ -323,6 +341,7 @@ namespace :telemetry do
       @id = instance.new_project_id
       @languages = ALL_LANGUAGES.sample(1 + rand(2))
       @call_flows = (0..rand(5)).map { create_flow }
+      @channels = rand(@call_flows.length * 1.5)
       @lifespan = rand(5)
     end
 
@@ -333,6 +352,18 @@ namespace :telemetry do
       }
     end
 
+    def call_logs
+      (0..channels).flat_map do |channel|
+        (0..rand(3)).map do
+          {
+            channel_id: channel,
+            date: (Date.today - rand(7)).iso8601,
+            state: ["completed", "failed"].sample
+          }
+        end
+      end
+    end
+
     def advance_state
       @lifespan += rand(14)
 
@@ -340,6 +371,8 @@ namespace :telemetry do
         languages.concat(ALL_LANGUAGES.sample(1)).uniq! if rand(30) == 0
         flow[:step_count] += rand(2)
       end
+
+      @channels += rand(3)
     end
 
   end
