@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "Nuntium:-Channels-by-Type",
+    "_type": "visualization",
+    "_source": {
+      "title": "Nuntium: Channels by Type",
+      "visState": "{\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"beginning\",\"interval\":\"w\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"key.type\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"5\"}},{\"id\":\"5\",\"type\":\"sum\",\"schema\":\"metric\",\"params\":{\"field\":\"value\"}}],\"listeners\":{}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"telemetry-*\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"kind: channels_by_type\"}},\"filter\":[]}"
+      }
+    }
+  }
+]
