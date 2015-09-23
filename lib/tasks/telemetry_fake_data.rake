@@ -1,7 +1,7 @@
 namespace :telemetry do
-  
+
   ALL_LANGUAGES = [:AF, :EN, :ES, :FR, :KO, :PT]
-  
+
   LOCATIONS = [
     [-34.569614, -58.448061],
     [37.775545, -122.442750],
@@ -12,6 +12,8 @@ namespace :telemetry do
     [14.556971, -87.588810],
     [-11.743711, -49.268501]
   ]
+
+  ALL_COUNTRY_CODES = ['54', '1', '855', '84']
 
   desc 'Creates and indexes fake data'
   task fake_data: :environment do
@@ -30,12 +32,12 @@ namespace :telemetry do
   end
 
   def init_state
-    @instances = (1..8).map { FakeInstance.new }
+    @instances = (1..8).map { FakeVerboiceInstance.new } + (1..8).map { FakeNuntiumInstance.new}
   end
 
   def advance_state
     @instances.each(&:advance_state)
-    rand(2).times { @instances << FakeInstance.new } if rand(3) == 0
+    rand(2).times { @instances << FakeVerboiceInstance.new; @instances << FakeNuntiumInstance.new } if rand(3) == 0
   end
 
   def record_stats(current_period)
@@ -46,18 +48,126 @@ namespace :telemetry do
   end
 
   class FakeInstance
-
     attr_reader :uuid
     attr_reader :latitude
     attr_reader :longitude
 
     def initialize
+      @latitude, @longitude  = LOCATIONS.sample
+      @uuid = SecureRandom.uuid
+    end
+
+    protected
+
+    def build_event(all_stats, period)
+      base = {
+        "period" => { "beginning" => period.iso8601, "end" => (period + 1.week).iso8601 },
+        "counters" => [],
+        "sets" => [],
+        "timespans" => []
+      }
+
+      all_stats.inject(base) do |result, stats|
+        result.tap do |r|
+          r["counters"].concat(stats["counters"])           if stats["counters"]
+          r["sets"].concat(stats["sets"])                   if stats["sets"]
+          r["timespans"].concat(stats["timespans"])         if stats["timespans"]
+        end
+      end
+    end
+  end
+
+  class FakeNuntiumInstance < FakeInstance
+    def initialize
+      super
+      @ao_count = 0
+      @at_count = 0
+      @channels_by_type = Hash.new 0
+    end
+
+    def current_stats(period)
+      all_stats = [
+        unique_phone_numbers_per_country_code,
+        ao_count,
+        at_count,
+        active_channels,
+        channels_by_type
+      ]
+
+      build_event(all_stats, period)
+    end
+
+    def advance_state
+    end
+
+    def unique_phone_numbers_per_country_code
+      {
+        "counters" => ALL_COUNTRY_CODES.map { |country_code|
+          {
+            "kind" => "numbers_by_country_code",
+            "key" => { "country_code" => country_code },
+            "value" => rand(50)
+          }
+        }
+      }
+    end
+
+    def ao_count
+      {
+        "counters" => [
+          {
+            "kind" => "ao_messages",
+            "key" => {},
+            "value" => (@ao_count += rand(1000))
+          }
+        ]
+      }
+    end
+
+    def at_count
+      {
+        "counters" => [
+          {
+            "kind" => "at_messages",
+            "key" => {},
+            "value" => (@at_count += rand(1000))
+          }
+        ]
+      }
+    end
+
+    def active_channels
+      {
+        "counters" => [
+          {
+            "kind" => "active_channels",
+            "key" => {},
+            "value" => rand(30)
+          }
+        ]
+      }
+    end
+
+    def channels_by_type
+      {
+        "counters" => ['clickatell', 'msn', 'dtac', 'xmpp', 'twilio'].map { |type|
+          {
+            "kind" => "channels_by_type",
+            "key" => { "type" => type },
+            "value" => (@channels_by_type[type] += rand(20))
+          }
+        }
+      }
+    end
+  end
+
+  class FakeVerboiceInstance < FakeInstance
+
+    def initialize
+      super
       @user_id_seq = 0
       @project_id_seq = 0
       @call_flow_id_seq = 0
-      @latitude, @longitude  = LOCATIONS.sample
-
-      @uuid = SecureRandom.uuid
       @users = (1..10).map { create_user }
     end
 
@@ -87,20 +197,7 @@ namespace :telemetry do
         steps_per_call_flow_stats
       ]
 
-      base = {
-        "period" => { "beginning" => period.iso8601, "end" => (period + 1.week).iso8601 },
-        "counters" => [],
-        "sets" => [],
-        "timespans" => []
-      }
-
-      all_stats.inject(base) do |result, stats|
-        result.tap do |r|
-          r["counters"].concat(stats["counters"])           if stats["counters"]
-          r["sets"].concat(stats["sets"])                   if stats["sets"]
-          r["timespans"].concat(stats["timespans"])         if stats["timespans"]
-        end
-      end
+      build_event(all_stats, period)
     end
 
     def all_projects
@@ -222,7 +319,7 @@ namespace :telemetry do
     def initialize(instance, user)
       @instance = instance
       @user = user
-      
+
       @id = instance.new_project_id
       @languages = ALL_LANGUAGES.sample(1 + rand(2))
       @call_flows = (0..rand(5)).map { create_flow }
