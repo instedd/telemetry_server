@@ -8,7 +8,7 @@
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"telemetry-*\",\"query\":{\"query_string\":{\"query\":\"kind: active_channels\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"telemetry-*\",\"query\":{\"query_string\":{\"query\":\"metric: active_channels\",\"analyze_wildcard\":true}},\"filter\":[]}"
       }
     }
   }

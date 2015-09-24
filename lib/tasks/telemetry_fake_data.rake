@@ -104,7 +104,7 @@ namespace :telemetry do
       {
         "counters" => ALL_COUNTRY_CODES.map { |country_code|
           {
-            "kind" => "numbers_by_country_code",
+            "metric" => "numbers_by_country_code",
             "key" => { "country_code" => country_code },
             "value" => rand(50)
           }
@@ -116,7 +116,7 @@ namespace :telemetry do
       {
         "counters" => [
           {
-            "kind" => "ao_messages",
+            "metric" => "ao_messages",
             "key" => {},
             "value" => (@ao_count += rand(1000))
           }
@@ -128,7 +128,7 @@ namespace :telemetry do
       {
         "counters" => [
           {
-            "kind" => "at_messages",
+            "metric" => "at_messages",
             "key" => {},
             "value" => (@at_count += rand(1000))
           }
@@ -140,7 +140,7 @@ namespace :telemetry do
       {
         "counters" => [
           {
-            "kind" => "active_channels",
+            "metric" => "active_channels",
             "key" => {},
             "value" => rand(30)
           }
@@ -152,7 +152,7 @@ namespace :telemetry do
       {
         "counters" => ['clickatell', 'msn', 'dtac', 'xmpp', 'twilio'].map { |type|
           {
-            "kind" => "channels_by_type",
+            "metric" => "channels_by_type",
             "key" => { "type" => type },
             "value" => (@channels_by_type[type] += rand(20))
           }
@@ -209,7 +209,7 @@ namespace :telemetry do
       {
         "counters" => all_projects.map { |project|
           {
-            "kind" => "call_flows",
+            "metric" => "call_flows",
             "key" => { "project_id" => project.id },
             "value" => project.call_flows.length
           }
@@ -221,7 +221,7 @@ namespace :telemetry do
       {
         "sets" => all_projects.map { |project|
           {
-            "kind" => "languages",
+            "metric" => "languages",
             "key" => { "project_id" => project.id },
             "elements" => project.languages
           }
@@ -233,7 +233,7 @@ namespace :telemetry do
       {
         "counters" => [
           {
-            "kind" => "projects",
+            "metric" => "projects",
             "key" => {},
             "value" => all_projects.length
           }
@@ -245,7 +245,7 @@ namespace :telemetry do
       {
         "timespans" => @users.map { |user|
           {
-            "kind" => "user_lifespan",
+            "metric" => "user_lifespan",
             "key" => { "user_id" => user.id },
             "days" => user.lifespan
           }
@@ -257,7 +257,7 @@ namespace :telemetry do
       {
         "timespans" => all_projects.map { |project|
           {
-            "kind" => "project_lifespan",
+            "metric" => "project_lifespan",
             "key" => { "project_id" => project.id },
             "days" => project.lifespan
           }
@@ -270,7 +270,7 @@ namespace :telemetry do
         "counters" => all_projects.flat_map { |project|
           project.call_flows.map { |call_flow|
             {
-              "kind" => "steps",
+              "metric" => "steps",
               "key" => { "call_flow" => call_flow[:id] },
               "value" => call_flow[:step_count]
             }
@@ -286,7 +286,7 @@ namespace :telemetry do
 
           grouped_calls.map do |key, flows|
             {
-              "kind" => "calls",
+              "metric" => "calls",
               "key" => { "channel_id" => key[0], "date" => key[1], "state" => key[2] },
               "value" => flows.length
             }

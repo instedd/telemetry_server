@@ -8,16 +8,16 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
   let(:data) do
     {
       counters: [
-        {kind: 'users', key: {project_id: 5}, value: 11},
-        {kind: 'calls', key: {project_id: 3}, value: 17}
+        {metric: 'users', key: {project_id: 5}, value: 11},
+        {metric: 'calls', key: {project_id: 3}, value: 17}
       ],
       sets: [
-        {kind: 'languages', key: {project_id: 7}, elements: ['en', 'es', 'jp']},
-        {kind: 'channels', key: {project_id: 23}, elements: ['twilio', 'sip', 'callcentric']}
+        {metric: 'languages', key: {project_id: 7}, elements: ['en', 'es', 'jp']},
+        {metric: 'channels', key: {project_id: 23}, elements: ['twilio', 'sip', 'callcentric']}
       ],
       timespans: [
-        {kind: 'user_lifespan', key: {user_id: 46}, days: 14},
-        {kind: 'project_lifespan', key: {project_id: 34}, days: 30}
+        {metric: 'user_lifespan', key: {user_id: 46}, days: 14},
+        {metric: 'project_lifespan', key: {project_id: 34}, days: 30}
       ],
       period: {beginning: from.iso8601, end: to.iso8601}
     }.to_json
@@ -35,8 +35,8 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(response.total).to eq(2)
 
     results = response.results
-    users_result = results.find{|x| x['kind'] == 'users'}
-    calls_result = results.find{|x| x['kind'] == 'calls'}
+    users_result = results.find{|x| x['metric'] == 'users'}
+    calls_result = results.find{|x| x['metric'] == 'calls'}
 
     expect(users_result['_id']).to eq("#{event.id}-0")
     expect(users_result['key']['project_id']).to eq(5)
@@ -61,8 +61,8 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(response.total).to eq(2)
 
     results = response.results
-    languages_result = results.find{|x| x['kind'] == 'languages'}
-    channels_result = results.find{|x| x['kind'] == 'channels'}
+    languages_result = results.find{|x| x['metric'] == 'languages'}
+    channels_result = results.find{|x| x['metric'] == 'channels'}
 
     expect(languages_result['_id']).to eq("#{event.id}-0")
     expect(languages_result['key']['project_id']).to eq(7)
@@ -87,8 +87,8 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(response.total).to eq(2)
 
     results = response.results
-    user_lifespan_result = results.find{|x| x['kind'] == 'user_lifespan'}
-    project_lifespan_result = results.find{|x| x['kind'] == 'project_lifespan'}
+    user_lifespan_result = results.find{|x| x['metric'] == 'user_lifespan'}
+    project_lifespan_result = results.find{|x| x['metric'] == 'project_lifespan'}
 
     expect(user_lifespan_result['_id']).to eq("#{event.id}-0")
     expect(user_lifespan_result['key']['user_id']).to eq(46)
