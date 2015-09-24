@@ -3,23 +3,20 @@ require 'rails_helper'
 RSpec.describe GeocodeInstallationJob, type: :job do
   let(:ip) { '23.17.11.7'}
   let!(:installation) { create(:installation, ip: ip, latitude: nil, longitude: nil) }
-  let(:job) { GeocodeInstallationJob}
+  let(:geocode_service) { double('geocode_service') }
 
   before :each do
-    WebMock.reset!
+    allow(GeocodeService).to receive(:get).and_return(geocode_service)
   end
 
   it 'geocodes the installation' do
-    request = stub_request(:get, "http://freegeoip.net/json/#{installation.ip}").to_return(body: {
-      latitude: -34.123,
-      longitude: -58.456
-    }.to_json)
+    geocode_result = double(:geocode_result, latitude: -34.123, longitude: -58.456)
+    expect(geocode_service).to receive(:geocode_ip).with(ip).and_return(geocode_result)
 
     GeocodeInstallationJob.perform_now(installation.id)
 
     expect(installation.reload.latitude).to eq(-34.123)
     expect(installation.reload.longitude).to eq(-58.456)
-    expect(request).to have_been_requested
   end
 
   it 'should not fail if installation is missing' do
@@ -28,10 +25,16 @@ RSpec.describe GeocodeInstallationJob, type: :job do
     }.to_not raise_error(Exception)
   end
 
+  it 'should not fail if result is not found' do
+    expect(geocode_service).to receive(:geocode_ip).with(ip).and_return(nil)
+
+    GeocodeInstallationJob.perform_now(installation.id)
+  end
+
   it 'should not fail if ip is missing' do
     installation = create(:installation, ip: nil, latitude: nil, longitude: nil)
 
-    expect(RestClient).to_not receive(:get)
+    expect(geocode_service).to_not receive(:geocode_ip)
 
     GeocodeInstallationJob.perform_now(installation.id)
 
