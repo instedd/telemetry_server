@@ -42,7 +42,11 @@ namespace :telemetry do
 
   def record_stats(current_period)
     @instances.each do |instance|
-      installation = Installation.find_or_create_by(uuid: instance.uuid) { |i| i.latitude = instance.latitude; i.longitude = instance.longitude }
+      installation = Installation.find_or_create_by(uuid: instance.uuid) do |i|
+        i.latitude = instance.latitude
+        i.longitude = instance.longitude
+        i.application = instance.application
+      end
       installation.events.build(data: instance.current_stats(current_period).to_json).save
     end
   end
@@ -51,6 +55,7 @@ namespace :telemetry do
     attr_reader :uuid
     attr_reader :latitude
     attr_reader :longitude
+    attr_reader :application
 
     def initialize
       @latitude, @longitude  = LOCATIONS.sample
@@ -80,6 +85,7 @@ namespace :telemetry do
   class FakeNuntiumInstance < FakeInstance
     def initialize
       super
+      @application = 'nuntium'
       @ao_count = 0
       @at_count = 0
       @channels_by_type = Hash.new 0
@@ -165,6 +171,7 @@ namespace :telemetry do
 
     def initialize
       super
+      @application = 'verboice'
       @user_id_seq = 0
       @project_id_seq = 0
       @call_flow_id_seq = 0

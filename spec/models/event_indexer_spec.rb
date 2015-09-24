@@ -19,7 +19,8 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
         {metric: 'user_lifespan', key: {user_id: 46}, days: 14},
         {metric: 'project_lifespan', key: {project_id: 34}, days: 30}
       ],
-      period: {beginning: from.iso8601, end: to.iso8601}
+      period: {beginning: from.iso8601, end: to.iso8601},
+      application: 'verboice'
     }.to_json
   end
   let(:event) { create(:event, installation: installation, data: data)}
@@ -43,12 +44,14 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(users_result['value']).to eq(11)
     expect(users_result['beginning']).to eq(from.iso8601)
     expect(users_result['end']).to eq(to.iso8601)
+    expect(users_result['application']).to eq('verboice')
 
     expect(calls_result['_id']).to eq("#{event.id}-1")
     expect(calls_result['key']['project_id']).to eq(3)
     expect(calls_result['value']).to eq(17)
     expect(calls_result['beginning']).to eq(from.iso8601)
     expect(calls_result['end']).to eq(to.iso8601)
+    expect(calls_result['application']).to eq('verboice')
   end
 
   it 'should index sets' do
@@ -69,12 +72,14 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(languages_result['elements']).to eq(['en', 'es', 'jp'])
     expect(languages_result['beginning']).to eq(from.iso8601)
     expect(languages_result['end']).to eq(to.iso8601)
+    expect(languages_result['application']).to eq('verboice')
 
     expect(channels_result['_id']).to eq("#{event.id}-1")
     expect(channels_result['key']['project_id']).to eq(23)
     expect(channels_result['elements']).to eq(['twilio', 'sip', 'callcentric'])
     expect(channels_result['beginning']).to eq(from.iso8601)
     expect(channels_result['end']).to eq(to.iso8601)
+    expect(channels_result['application']).to eq('verboice')
   end
 
   it "should index timespans" do
@@ -95,12 +100,35 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(user_lifespan_result['days']).to eq(14)
     expect(user_lifespan_result['beginning']).to eq(from.iso8601)
     expect(user_lifespan_result['end']).to eq(to.iso8601)
+    expect(user_lifespan_result['application']).to eq('verboice')
 
     expect(project_lifespan_result['_id']).to eq("#{event.id}-1")
     expect(project_lifespan_result['key']['project_id']).to eq(34)
     expect(project_lifespan_result['days']).to eq(30)
     expect(project_lifespan_result['beginning']).to eq(from.iso8601)
     expect(project_lifespan_result['end']).to eq(to.iso8601)
+    expect(project_lifespan_result['application']).to eq('verboice')
+  end
+
+  it 'should index application from installation if not present in event data' do
+    data = {
+      counters: [
+        {metric: 'active_channels', key: {}, value: 37}
+      ],
+      period: {beginning: from.iso8601, end: to.iso8601}
+    }.to_json
+
+    installation = build(:installation, application: 'nuntium')
+    event = build(:event, installation: installation, data: data)
+
+    indexer.index(event)
+
+    refresh_index
+
+    response = search_counters
+
+    expect(response.total).to eq(1)
+    expect(response.results.first['application']).to eq('nuntium')
   end
 
 end
