@@ -56,7 +56,7 @@ RSpec.describe Installation, type: :model do
   end
 
   describe 'last reported at' do
-    let(:now) { Time.now.utc }
+    let(:now) { Time.now.utc.change(nsec: 0) }
     let(:installation) { create(:installation) }
 
     before :each do
