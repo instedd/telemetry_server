@@ -1,5 +1,7 @@
 # Instedd Telemetry Server
 
+[![Build Status](https://travis-ci.org/instedd/telemetry_server.svg?branch=master)](https://travis-ci.org/instedd/telemetry_server)
+
 ## Dependencies
 
 * Ruby 2.2.2
