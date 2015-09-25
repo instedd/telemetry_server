@@ -16,6 +16,8 @@ gem 'elasticsearch'
 gem 'geoip'
 gem 'puma'
 gem 'devise'
+gem 'bootstrap-sass'
+gem 'listings'
 
 group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]

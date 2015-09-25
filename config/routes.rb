@@ -8,4 +8,8 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  resources :installations, only: [:index]
+
+  mount Listings::Engine => "/listings"
 end
