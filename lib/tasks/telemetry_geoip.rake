@@ -5,7 +5,7 @@ namespace :telemetry do
     
     remote_url = "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz"
     local_file = "#{Dir.mktmpdir}/GeoLiteCity.dat.gz"
-    output = GeocodeInstallationJob::GEOLITE_DB_PATH
+    output = GeocodeService::GEOLITE_DB_PATH
     
     download_file(remote_url, local_file) && gunzip(local_file, output)
   end
