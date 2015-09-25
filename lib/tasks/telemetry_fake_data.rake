@@ -88,7 +88,7 @@ namespace :telemetry do
       @application = 'nuntium'
       @ao_count = 0
       @at_count = 0
-      @channels_by_type = Hash.new 0
+      @channels_by_kind = Hash.new 0
     end
 
     def current_stats(period)
@@ -97,7 +97,7 @@ namespace :telemetry do
         ao_count,
         at_count,
         active_channels,
-        channels_by_type
+        channels_by_kind
       ]
 
       build_event(all_stats, period)
@@ -154,13 +154,13 @@ namespace :telemetry do
       }
     end
 
-    def channels_by_type
+    def channels_by_kind
       {
-        "counters" => ['clickatell', 'msn', 'dtac', 'xmpp', 'twilio'].map { |type|
+        "counters" => ['clickatell', 'msn', 'dtac', 'xmpp', 'twilio'].map { |kind|
           {
-            "metric" => "channels_by_type",
-            "key" => { "type" => type },
-            "value" => (@channels_by_type[type] += rand(20))
+            "metric" => "channels_by_kind",
+            "key" => { "kind" => kind },
+            "value" => (@channels_by_kind[kind] += rand(20))
           }
         }
       }
