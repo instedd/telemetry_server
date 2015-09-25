@@ -11,11 +11,24 @@ kibana:
   ports:
     - 8081:5601
 
+redis:
+  image: redis
+
 web:
   build: .
   links:
     - db
     - elasticsearch
+    - redis
   env_file: docker-dev.env
   ports:
     - 8080:80
+
+sidekiq:
+  build: .
+  command: bundle exec sidekiq
+  links:
+    - db
+    - elasticsearch
+    - redis
+  env_file: docker-dev.env

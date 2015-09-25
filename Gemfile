@@ -27,6 +27,10 @@ group :development do
   gem 'spring'
 end
 
+group :production do
+  gem 'sidekiq'
+end
+
 group :test do
   gem 'shoulda-matchers'
   gem 'faker'
