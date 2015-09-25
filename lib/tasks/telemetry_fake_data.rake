@@ -19,7 +19,7 @@ namespace :telemetry do
   task fake_data: :environment do
 
     current_period = "2015-01-01T00:00:00:00".to_datetime
-    last_period    = "2015-09-07T00:00:00:00".to_datetime
+    last_period    = Time.now.utc.beginning_of_week
 
     init_state
 
