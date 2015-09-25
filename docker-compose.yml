@@ -1,0 +1,21 @@
+db:
+  image: postgres
+
+elasticsearch:
+  image: elasticsearch:1.7.2
+
+kibana:
+  image: kibana
+  links:
+    - elasticsearch
+  ports:
+    - 8081:5601
+
+web:
+  build: .
+  links:
+    - db
+    - elasticsearch
+  env_file: docker-dev.env
+  ports:
+    - 8080:80

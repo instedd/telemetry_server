@@ -1,7 +1,7 @@
 class ElasticsearchService
   class << self
     def client
-      @client ||= Elasticsearch::Client.new log: should_log
+      @client ||= Elasticsearch::Client.new url: url, log: should_log
     end
 
     def should_log
@@ -10,6 +10,10 @@ class ElasticsearchService
 
     def index_name
       Rails.env.production? ? 'telemetry' : "telemetry-#{Rails.env}"
+    end
+
+    def url
+      ENV['ELASTICSEARCH_URL'] || 'localhost'
     end
 
     def init_mappings
