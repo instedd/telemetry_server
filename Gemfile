@@ -15,6 +15,7 @@ gem 'rest-client'
 gem 'elasticsearch'
 gem 'geoip'
 gem 'puma'
+gem 'devise'
 
 group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]
