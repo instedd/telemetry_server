@@ -8,7 +8,7 @@
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"telemetry-dev*\",\"query\":{\"query_string\":{\"query\":\"_type: installation AND last_reported_at: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"telem*\",\"query\":{\"query_string\":{\"query\":\"_type: installation AND last_reported_at: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
       }
     }
   }
