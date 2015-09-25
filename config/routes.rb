@@ -11,5 +11,7 @@ Rails.application.routes.draw do
 
   resources :installations, only: [:index]
 
+  root to: "installations#index"
+
   mount Listings::Engine => "/listings"
 end

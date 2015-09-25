@@ -1,4 +1,4 @@
-class InstallationsController < ApplicationController
+class InstallationsController < AuthenticatedController
 
   def index
   end
