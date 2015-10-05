@@ -8,7 +8,7 @@
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"telemetry*\",\"query\":{\"query_string\":{\"query\":\"metric: user_lifespan AND beginning: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"telemetry*\",\"query\":{\"query_string\":{\"query\":\"metric: account_lifespan AND beginning: [now-2w TO now]\",\"analyze_wildcard\":true}},\"filter\":[]}"
       }
     }
   }

@@ -252,7 +252,7 @@ namespace :telemetry do
       {
         "timespans" => @users.map { |user|
           {
-            "metric" => "user_lifespan",
+            "metric" => "account_lifespan",
             "key" => { "user_id" => user.id },
             "days" => user.lifespan
           }
