@@ -6,53 +6,52 @@ RSpec.describe Installation, type: :model do
   it { is_expected.to validate_uniqueness_of(:uuid) }
 
   describe 'geocode' do
-    it 'geocodes using job when creating' do
-      expect(GeocodeInstallationJob).to receive(:perform_later)
-
-      installation = create(:installation, ip: '23.17.11.7')
+    
+    it 'hooks geocoding to transaction commit' do
+      installation = create(:installation)
+      expect(installation).to receive(:geocode)
+      installation.run_callbacks(:commit)
     end
 
-    it 'geocodes using job when updating' do
-      installation = create(:installation, ip: nil)
+    it "geocodes using job if ip changed" do
+      installation = create(:installation)
 
       expect(GeocodeInstallationJob).to receive(:perform_later).with(installation.id)
-
       installation.ip = '23.17.11.7'
-
-      installation.save!
+      installation.send :geocode
     end
 
     it 'should not geocode if ip is not present' do
+      installation = create(:installation, ip: '23.17.11.7')
+      
       expect(GeocodeInstallationJob).not_to receive(:perform_later)
-      installation = create(:installation, ip: nil)
+      installation.ip = nil
+      installation.send :geocode
     end
 
     it 'should not geocode if ip has not changed' do
-      installation = create(:installation)
-
+      installation = create(:installation, ip: '23.17.11.7')
+      
       expect(GeocodeInstallationJob).not_to receive(:perform_later)
-
       installation.uuid = "#{installation.uuid}-updated"
-
-      installation.save!
+      installation.send :geocode
     end
   end
 
   describe 'index' do
-    it 'indexes using job when creating' do
-      expect(IndexInstallationJob).to receive(:perform_later)
 
-      create(:installation, ip: nil)
+    it 'hooks indexing to transaction commit' do
+      installation = create(:installation, ip: nil)
+      expect(installation).to receive(:index_installation)
+      installation.run_callbacks(:commit)
     end
 
-    it 'indexes using job when updating' do
+    it 'indexes using job' do
+      expect(IndexInstallationJob).to receive(:perform_later)
       installation = create(:installation)
-
-      installation.last_reported_at = Time.now.utc
-      expect(IndexInstallationJob).to receive(:perform_later)
-
-      installation.save
+      installation.send :index_installation
     end
+
   end
 
   describe 'last reported at' do

@@ -5,16 +5,25 @@ RSpec.describe Event, type: :model do
   it { is_expected.to validate_presence_of(:installation) }
 
   describe 'index' do
-    it 'indexes using job when creating' do
+
+    it 'hooks indexint to transaction commit' do
+      event = create(:event, data: 'some data')
+      expect(event).to receive(:index_event)
+      event.run_callbacks(:commit)
+    end
+
+    it "indexes using job" do
       expect(IndexEventJob).to receive(:perform_later)
 
-      create(:event, data: 'some data')
+      event = create(:event, data: 'some data')
+      event.send :index_event
     end
 
     it 'doesnt index if data is not present' do
       expect(IndexEventJob).not_to receive(:perform_later)
 
-      create(:event, data: nil)
+      event = create(:event, data: nil)
+      event.send :index_event
     end
   end
 

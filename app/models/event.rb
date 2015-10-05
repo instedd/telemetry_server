@@ -3,8 +3,8 @@ class Event < ActiveRecord::Base
 
   validates :installation, presence: true
 
-  after_create :index_event
-  after_create :touch_installation
+  after_save   :touch_installation
+  after_commit :index_event
 
   private
 

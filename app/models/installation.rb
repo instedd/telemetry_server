@@ -4,8 +4,8 @@ class Installation < ActiveRecord::Base
   validates :uuid, presence: true
   validates :uuid, uniqueness: true
 
-  after_save :geocode
-  after_save :index_installation
+  after_commit :geocode
+  after_commit :index_installation
 
   def touch_last_reported_at!
     self.last_reported_at = Time.now.utc
