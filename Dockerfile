@@ -12,6 +12,8 @@ ADD . /app
 # Pass dummy secret key so that devise initializer doesn't fail
 RUN bundle exec rake assets:precompile RAILS_ENV=production SECRET_KEY_BASE=secret
 
+RUN bundle exec rake telemetry:geoip SECRET_KEY_BASE=secret
+
 # Add scripts
 ADD docker/runit-web-run /etc/service/web/run
 ADD docker/migrate       /app/migrate

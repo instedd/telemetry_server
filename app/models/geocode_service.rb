@@ -1,5 +1,5 @@
 class GeocodeService
-  GEOLITE_DB_PATH = 'etc/geoip/GeoLiteCity.dat'
+  GEOLITE_DB_PATH = "#{Rails.root}/etc/geoip/GeoLiteCity.dat"
 
   def self.get
     @service ||= self.new
