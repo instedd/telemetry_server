@@ -18,7 +18,7 @@ class Api::InstallationsController < Api::BaseController
   end
 
   def installation_params
-    params.require(:installation).permit(:admin_email, :application)
+    params.require(:installation).permit(:admin_email, :application, :opt_out)
   end
 
 end
