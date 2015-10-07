@@ -8,14 +8,14 @@ elasticsearch:
   volumes:
     - '/usr/share/elasticsearch/data'
   ports:
-    - 8082:9200
+    - 9200:9200
 
 kibana:
   image: kibana
   links:
     - elasticsearch
   ports:
-    - 8081:5601
+    - 5601:5601
 
 redis:
   image: redis
@@ -28,7 +28,7 @@ web:
     - redis
   env_file: docker-dev.env
   ports:
-    - 8080:80
+    - 80:80
 
 sidekiq:
   build: .
