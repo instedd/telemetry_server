@@ -13,27 +13,24 @@ RSpec.describe Installation, type: :model do
       installation.run_callbacks(:commit)
     end
 
-    it "geocodes using job if ip changed" do
-      installation = create(:installation)
+    it "geocodes using job if ip is present but no lat/lng" do
+      installation = create(:installation, ip: '23.17.11.7', latitude: nil, longitude: nil)
 
       expect(GeocodeInstallationJob).to receive(:perform_later).with(installation.id)
-      installation.ip = '23.17.11.7'
       installation.send :geocode
     end
 
     it 'should not geocode if ip is not present' do
-      installation = create(:installation, ip: '23.17.11.7')
+      installation = create(:installation, ip: nil, latitude: nil, longitude: nil)
       
       expect(GeocodeInstallationJob).not_to receive(:perform_later)
-      installation.ip = nil
       installation.send :geocode
     end
 
-    it 'should not geocode if ip has not changed' do
-      installation = create(:installation, ip: '23.17.11.7')
+    it 'should not geocode if latitude or longitude are present' do
+      installation = create(:installation, ip: '23.17.11.7', latitude: -34.517491, longitude: -58.483444)
       
       expect(GeocodeInstallationJob).not_to receive(:perform_later)
-      installation.uuid = "#{installation.uuid}-updated"
       installation.send :geocode
     end
   end

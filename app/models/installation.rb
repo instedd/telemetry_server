@@ -12,10 +12,14 @@ class Installation < ActiveRecord::Base
     self.save
   end
 
+  def needs_geocoding?
+    !self.latitude.present? || !self.latitude.present?
+  end
+
   private
 
   def geocode
-    if self.ip.present? && self.ip_changed?
+    if self.ip.present? && self.needs_geocoding?
       GeocodeInstallationJob.perform_later self.id
     end
   end
