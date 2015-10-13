@@ -1,3 +1,5 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   devise_for :users, except: [:registrations]
 
@@ -14,4 +16,8 @@ Rails.application.routes.draw do
   root to: "installations#index"
 
   mount Listings::Engine => "/listings"
+
+  authenticate :user do
+    mount Sidekiq::Web => '/sidekiq'
+  end
 end

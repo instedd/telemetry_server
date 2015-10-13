@@ -18,6 +18,7 @@ gem 'puma'
 gem 'devise'
 gem 'bootstrap-sass'
 gem 'listings'
+gem 'sinatra', :require => nil
 
 group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]
