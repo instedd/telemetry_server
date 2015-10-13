@@ -1,5 +1,3 @@
-require 'sidekiq/web'
-
 Rails.application.routes.draw do
   devise_for :users, except: [:registrations]
 
@@ -17,7 +15,10 @@ Rails.application.routes.draw do
 
   mount Listings::Engine => "/listings"
 
-  authenticate :user do
-    mount Sidekiq::Web => '/sidekiq'
+  if Rails.application.config.active_job.queue_adapter.eql? :sidekiq
+    require 'sidekiq/web'    
+    authenticate :user do
+      mount Sidekiq::Web => '/sidekiq'
+    end
   end
 end
