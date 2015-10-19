@@ -131,4 +131,10 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(response.results.first['application']).to eq('nuntium')
   end
 
+  it "does not fail on events without data" do
+    data = { period: {beginning: from.iso8601, end: to.iso8601}, counters: [], sets: [], timespans: [] }.to_json
+    event = build(:event, installation: installation, data: data)
+    expect { indexer.index(event) }.not_to raise_error
+  end
+
 end

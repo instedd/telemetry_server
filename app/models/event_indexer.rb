@@ -79,6 +79,6 @@ class EventIndexer
   end
 
   def bulk_index(data)
-    @client.bulk index: ElasticsearchService.index_name, body: data
+    @client.bulk index: ElasticsearchService.index_name, body: data unless data.empty?
   end
 end
