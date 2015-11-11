@@ -4,7 +4,7 @@ class EventIndexer
   end
 
   def index(event)
-    data = JSON.parse(event.data)
+    data = event.parsed_data
 
     period = data['period']
     application = data['application'] || event.installation.application

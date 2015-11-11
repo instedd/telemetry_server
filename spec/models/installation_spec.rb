@@ -51,18 +51,47 @@ RSpec.describe Installation, type: :model do
 
   end
 
-  describe 'last reported at' do
-    let(:now) { Time.now.utc.change(nsec: 0) }
+  describe 'update timestamps from event' do
     let(:installation) { create(:installation) }
 
-    before :each do
-      Timecop.freeze(now)
+    describe 'last reported at' do
+      let(:created_at) { 1.hour.ago }
+      let(:event) { build(:event, created_at: created_at) }
+
+      it 'updates last reported at' do
+        installation.update_timestamps_from event
+
+        expect(installation.reload.last_reported_at).to eq(created_at)
+      end
+
+      it 'keeps max last reported at' do
+        last_reported_at = created_at + 30.minutes
+        installation = create(:installation, last_reported_at: last_reported_at)
+
+        installation.update_timestamps_from event
+
+        expect(installation.reload.last_reported_at).to eq(last_reported_at)
+      end
     end
 
-    it 'updates last reported at' do
-      installation.touch_last_reported_at!
+    describe 'last errored at' do
+      let(:created_at) { 1.hour.ago }
+      let(:event) { build(:event_with_errors, created_at: created_at) }
 
-      expect(installation.reload.last_reported_at).to eq(now)
+      it 'updates last reported at' do
+        installation.update_timestamps_from event
+
+        expect(installation.reload.last_errored_at).to eq(created_at)
+      end
+
+      it 'keeps max last reported at' do
+        last_errored_at = created_at + 30.minutes
+        installation = create(:installation, last_errored_at: last_errored_at)
+
+        installation.update_timestamps_from event
+
+        expect(installation.reload.last_errored_at).to eq(last_errored_at)
+      end
     end
   end
 end

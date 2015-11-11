@@ -20,5 +20,9 @@ FactoryGirl.define do
 
   factory :event do
     installation
+
+    factory :event_with_errors do
+      data { {'errors' => ['error 1', 'error 2']}.to_json }
+    end
   end
 end

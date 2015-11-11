@@ -9,7 +9,13 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :installations, only: [:index]
+  resources :installations, only: [:index] do
+    resources :events, only: [:index] do
+      member do
+        get :errors
+      end
+    end
+  end
 
   root to: "installations#index"
 

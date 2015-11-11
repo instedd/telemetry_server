@@ -7,8 +7,13 @@ class Installation < ActiveRecord::Base
   after_commit :geocode
   after_commit :index_installation
 
-  def touch_last_reported_at!
-    self.last_reported_at = Time.now.utc
+  def update_timestamps_from(event)
+    self.last_reported_at = [self.last_reported_at, event.created_at].reject(&:nil?).max
+
+    if event.has_reported_errors?
+      self.last_errored_at = [self.last_errored_at, event.created_at].reject(&:nil?).max
+    end
+
     self.save
   end
 

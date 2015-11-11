@@ -3,8 +3,20 @@ class Event < ActiveRecord::Base
 
   validates :installation, presence: true
 
-  after_save   :touch_installation
+  after_save   :update_installation
   after_commit :index_event
+
+  def parsed_data
+    @parsed_data ||= JSON.parse(self.data).with_indifferent_access rescue {}
+  end
+
+  def has_reported_errors?
+    parsed_data[:errors].present?
+  end
+
+  def reported_errors
+    parsed_data[:errors] || []
+  end
 
   private
 
@@ -12,7 +24,7 @@ class Event < ActiveRecord::Base
     IndexEventJob.perform_later(self.id) if self.data.present?
   end
 
-  def touch_installation
-    self.installation.touch_last_reported_at!
+  def update_installation
+    self.installation.update_timestamps_from self
   end
 end
