@@ -75,7 +75,7 @@ RSpec.describe Installation, type: :model do
     end
 
     describe 'last errored at' do
-      let(:created_at) { 1.hour.ago }
+      let(:created_at) { 1.hour.ago.change(nsec: 0) }
       let(:event) { build(:event_with_errors, created_at: created_at) }
 
       it 'updates last reported at' do
