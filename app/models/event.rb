@@ -18,6 +18,22 @@ class Event < ActiveRecord::Base
     parsed_data[:errors] || []
   end
 
+  def beginning
+    if beginning_str = parsed_data[:period].try(:[], :beginning)
+      Time.parse(beginning_str)
+    else
+      nil
+    end
+  end
+
+  def end
+    if end_str = parsed_data[:period].try(:[], :end)
+      Time.parse(end_str)
+    else
+      nil
+    end
+  end
+
   private
 
   def index_event

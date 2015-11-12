@@ -81,4 +81,40 @@ RSpec.describe Event, type: :model do
       expect(event.reported_errors).to eq(['error 1', 'error 2', 'error 3'])
     end
   end
+
+  describe 'period' do
+    let(:date) { 1.hour.ago.change(nsec: 0) }
+
+    describe 'beginning' do
+      it 'returns from iso8601' do
+        event = build(:event, data: {'period' => {'beginning' => date}}.to_json)
+
+        expect(event.beginning).to eq(date)
+      end
+
+      it 'returns nil if not present' do
+        event = build(:event, data: {'period' => {}}.to_json)
+        expect(event.beginning).to be_nil
+
+        event = build(:event, data: nil)
+        expect(event.beginning).to be_nil
+      end
+    end
+
+    describe 'end' do
+      it 'returns from iso8601' do
+        event = build(:event, data: {'period' => {'end' => date}}.to_json)
+
+        expect(event.end).to eq(date)
+      end
+
+      it 'returns nil if not present' do
+        event = build(:event, data: {'period' => {}}.to_json)
+        expect(event.end).to be_nil
+
+        event = build(:event, data: nil)
+        expect(event.end).to be_nil
+      end
+    end
+  end
 end
