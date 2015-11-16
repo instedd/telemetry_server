@@ -1,5 +1,5 @@
 class EventsListing < Listings::Base
-  model { Event.where(installation_id: params[:installation_id]) }
+  model { Event.where(installation_id: params[:installation_id]).order('created_at DESC') }
 
   layout filters: :top
 
