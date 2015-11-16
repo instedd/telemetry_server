@@ -17,12 +17,14 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :dashboard, only: [:index]
+
   root to: "installations#index"
 
   mount Listings::Engine => "/listings"
 
   if Rails.application.config.active_job.queue_adapter.eql? :sidekiq
-    require 'sidekiq/web'    
+    require 'sidekiq/web'
     authenticate :user do
       mount Sidekiq::Web => '/sidekiq'
     end
