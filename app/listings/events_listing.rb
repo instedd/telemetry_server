@@ -5,10 +5,10 @@ class EventsListing < Listings::Base
 
   column :id
   column :created_at
-  column :beginning
-  column :end
+  column :beginning, sortable: false
+  column :end, sortable: false
 
-  column :has_reported_errors?, title: 'Errors' do |event|
+  column :has_reported_errors?, sortable: false, title: 'Errors' do |event|
     if event.has_reported_errors?
       content_tag(:i, nil, class: 'glyphicon glyphicon-remove', style: 'color: red;')
     else
