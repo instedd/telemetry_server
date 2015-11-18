@@ -5,8 +5,8 @@ class EventsListing < Listings::Base
 
   column :id
   column :created_at
-  column :beginning, sortable: false
-  column :end, sortable: false
+  column :period_beginning
+  column :period_end
 
   column :has_reported_errors?, sortable: false, title: 'Errors' do |event|
     if event.has_reported_errors?

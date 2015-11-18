@@ -83,38 +83,170 @@ RSpec.describe Event, type: :model do
   end
 
   describe 'period' do
-    let(:date) { 1.hour.ago.change(nsec: 0) }
+    let(:from) { DateTime.new(2015,12,4,7,0,0) }
+    let(:to) { from + 1.hour }
 
-    describe 'beginning' do
-      it 'returns from iso8601' do
-        event = build(:event, data: {'period' => {'beginning' => date}}.to_json)
+    it 'sets period span' do
+      event = build(:event, data: {period: {beginning: from, end: to}}.to_json)
 
-        expect(event.beginning).to eq(date)
-      end
+      event.save!
 
-      it 'returns nil if not present' do
-        event = build(:event, data: {'period' => {}}.to_json)
-        expect(event.beginning).to be_nil
-
-        event = build(:event, data: nil)
-        expect(event.beginning).to be_nil
-      end
+      expect(event.reload.period_beginning).to eq(from)
+      expect(event.reload.period_end).to eq(to)
     end
 
-    describe 'end' do
-      it 'returns from iso8601' do
-        event = build(:event, data: {'period' => {'end' => date}}.to_json)
+    it 'validates presence of end if beggining is present' do
+      event = build(:event, data: {period: {beginning: from}}.to_json)
 
-        expect(event.end).to eq(date)
+      expect(event.valid?).to be_falsy
+      expect(event.errors[:period_end].size).to eq(1)
+    end
+
+    it 'validates presence of beggining if beggining is end' do
+      event = build(:event, data: {period: {end: to}}.to_json)
+
+      expect(event.valid?).to be_falsy
+      expect(event.errors[:period_beginning].size).to eq(1)
+    end
+
+    it 'allows to be nil both beginning and end' do
+      event = build(:event, data: {period: {}}.to_json)
+
+      expect(event.valid?).to be_truthy
+      expect(event.save).to be_truthy
+    end
+
+    describe 'overlapping' do
+      let(:installation) { create(:installation) }
+      let(:data) { {period: {beginning: from, end: to}} }
+      let!(:event) { create(:event, installation: installation, data: data.to_json) }
+
+      it 'should validate overlapping with other event' do
+        other_from = from - 1.hour
+        other_to = from + 30.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from - 1.hour
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from
+        other_to = to - 30.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        other_from = from
+        other_to = to
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from + 30.minutes
+        other_to = to - 15.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from + 30.minutes
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
+
+        other_from = from + 30.minutes
+        other_to = to
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_falsy
       end
 
-      it 'returns nil if not present' do
-        event = build(:event, data: {'period' => {}}.to_json)
-        expect(event.end).to be_nil
+      it 'allows no overlapping spans' do
+        other_from = from - 2.hours
+        other_to = to - 2.hours
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
 
-        event = build(:event, data: nil)
-        expect(event.end).to be_nil
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from + 2.hours
+        other_to = to + 2.hours
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+      end
+
+      it 'allows contiguous spans' do
+        other_from = from - 1.hour
+        other_to = from
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = to
+        other_to = to + 1.hour
+        other_event = build(:event, installation: installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+      end
+
+      it 'should allow overlapping between different installations' do
+        other_installation = create(:installation)
+
+        other_from = from - 1.hour
+        other_to = from + 30.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from - 1.hour
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from
+        other_to = to - 30.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        other_from = from
+        other_to = to
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from + 30.minutes
+        other_to = to - 15.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from + 30.minutes
+        other_to = to + 30.minutes
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
+
+        other_from = from + 30.minutes
+        other_to = to
+        other_event = build(:event, installation: other_installation, data: {period: {beginning: other_from, end: other_to}}.to_json)
+
+        expect(other_event.valid?).to be_truthy
       end
     end
   end
+
 end
