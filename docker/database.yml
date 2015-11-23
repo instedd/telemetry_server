@@ -1,7 +1,7 @@
 production:
   adapter: postgresql
   encoding: unicode
-  pool: 5
+  pool: 30
   host: <%= ENV['DATABASE_HOST'] %>
   database: telemetry_server_production
   username: <%= ENV['DATABASE_USERNAME'] %>
