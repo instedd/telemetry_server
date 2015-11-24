@@ -116,6 +116,29 @@ RSpec.describe Event, type: :model do
       expect(event.save).to be_truthy
     end
 
+    describe 'already reported?' do
+      let(:installation) { create(:installation) }
+      let!(:reported_event) { create(:event, installation: installation, data: {period: {beginning: from, end: to}}.to_json) }
+
+      it 'tells if event was already reported' do
+        event = build(:event, installation: installation, data: {period: {beginning: from, end: to}}.to_json)
+
+        expect(event.already_reported?).to be_truthy
+      end
+
+      it 'should not report true if it is from another installation' do
+        event = build(:event, installation: create(:installation), data: {period: {beginning: from, end: to}}.to_json)
+
+        expect(event.already_reported?).to be_falsy
+      end
+
+      it 'should not report true if period is not the same' do
+        event = build(:event, installation: installation, data: {period: {beginning: from + 1.hour, end: to + 1.hour}}.to_json)
+
+        expect(event.already_reported?).to be_falsy
+      end
+    end
+
     describe 'overlapping' do
       let(:installation) { create(:installation) }
       let(:data) { {period: {beginning: from, end: to}} }

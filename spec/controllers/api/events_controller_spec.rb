@@ -74,6 +74,26 @@ RSpec.describe Api::EventsController, :type => :controller do
         expect(event.installation).to eq(installation)
         expect(event.data).to eq(event_data)
       end
+
+      it 'returns ok if event already reported' do
+        expect_any_instance_of(Event).to receive(:already_reported?).and_return(true)
+
+        expect {
+          post :create, installation_id: installation.uuid
+        }.not_to change(Event, :count)
+
+        expect(response).to be_success
+      end
+
+      it 'fails if event is invalid' do
+        expect_any_instance_of(Event).to receive(:save).and_return(false)
+
+        expect {
+          post :create, installation_id: installation.uuid
+        }.not_to change(Event, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
 
   end

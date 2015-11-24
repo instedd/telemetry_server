@@ -5,7 +5,7 @@ class Event < ActiveRecord::Base
   validate :period_span_presence
   validate :period_overlapping
 
-  before_validation :set_period_span, on: :create
+  before_validation :ensure_period_span, on: :create
   after_save   :update_installation
   after_commit :index_event
 
@@ -21,14 +21,19 @@ class Event < ActiveRecord::Base
     parsed_data[:errors] || []
   end
 
+  def already_reported?
+    ensure_period_span
+    self.class.where(period_beginning: self.period_beginning, period_end: self.period_end, installation: self.installation).exists?
+  end
+
   private
 
-  def set_period_span
-    if beginning_str = parsed_data[:period].try(:[], :beginning)
+  def ensure_period_span
+    if self.period_beginning.nil? && beginning_str = parsed_data[:period].try(:[], :beginning)
       self.period_beginning = Time.parse(beginning_str) rescue nil
     end
 
-    if end_str = parsed_data[:period].try(:[], :end)
+    if self.period_end.nil? && end_str = parsed_data[:period].try(:[], :end)
       self.period_end = Time.parse(end_str) rescue nil
     end
   end

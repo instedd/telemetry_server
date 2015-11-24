@@ -3,10 +3,12 @@ class Api::EventsController < Api::BaseController
 
   def create
     event = @installation.events.build(data: event_data)
-    if event.save
-      render nothing: true, status: :ok
+    if event.already_reported?
+      head :ok
+    elsif event.save
+      head :ok
     else
-      render nothing: true, status: :unprocessable_entity
+      head :unprocessable_entity
     end
   end
 
