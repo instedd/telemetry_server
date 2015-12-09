@@ -7,9 +7,9 @@ class InstallationsListing < Listings::Base
 
   column :application, searchable: true
   column :admin_email, searchable: true
-  
+  column :ip, title: 'IP'
   column :uuid, title: 'UUID', searchable: true
-    
+
   column :last_reported_at, title: 'Last report' do |installation|
     if installation.opt_out
       content_tag(:i, nil, class: 'glyphicon glyphicon-remove', title: 'Opted out of reporting')
@@ -33,7 +33,7 @@ class InstallationsListing < Listings::Base
   end
 
   paginates_per 20
-  
+
   export :csv, :xls
 
 end
