@@ -9,11 +9,11 @@ namespace :elasticsearch do
     installation_indexer = InstallationIndexer.new
     event_indexer = EventIndexer.new
 
-    Installation.find_each do |installation|
+    Installation.find_each batch_size: 100 do |installation|
       installation_indexer.index(installation)
     end
 
-    Event.find_each do |event|
+    Event.find_each batch_size: 100 do |event|
       event_indexer.index(event)
     end
   end
