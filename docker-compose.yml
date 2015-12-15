@@ -4,16 +4,20 @@ db:
     - '/var/lib/postgresql/data'
 
 elasticsearch:
-  image: elasticsearch:1.7.2
+  image: elasticsearch:2.1
+  command: elasticsearch -Des.network.host=0.0.0.0
   volumes:
     - '/usr/share/elasticsearch/data'
   ports:
     - 9200:9200
 
 kibana:
-  image: kibana
+  image: kibana:4.3
+  command: gosu kibana kibana
   links:
     - elasticsearch
+  volumes:
+    - './docker/kibana.yml:/opt/kibana/config/kibana.yml'
   ports:
     - 5601:5601
 
@@ -26,6 +30,7 @@ web:
     - db
     - elasticsearch
     - redis
+    - kibana
   env_file: docker-dev.env
   ports:
     - 80:80

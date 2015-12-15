@@ -23,6 +23,10 @@ Rails.application.routes.draw do
 
   mount Listings::Engine => "/listings"
 
+  authenticate :user do
+    mount KibanaProxy.new(streaming: false) => "/kibana"
+  end
+
   if Rails.application.config.active_job.queue_adapter.eql? :sidekiq
     require 'sidekiq/web'
     authenticate :user do

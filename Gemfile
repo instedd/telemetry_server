@@ -19,6 +19,7 @@ gem 'devise'
 gem 'bootstrap-sass'
 gem 'listings'
 gem 'sinatra', :require => nil
+gem 'rack-proxy'
 
 group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]
