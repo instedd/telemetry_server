@@ -12,12 +12,9 @@ elasticsearch:
     - 9200:9200
 
 kibana:
-  image: kibana:4.3
-  command: gosu kibana kibana
+  image: instedd/telemetry-kibana:4.3
   links:
     - elasticsearch
-  volumes:
-    - './docker/kibana.yml:/opt/kibana/config/kibana.yml'
   ports:
     - 5601:5601
 
