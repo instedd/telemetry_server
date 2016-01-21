@@ -52,7 +52,7 @@ RSpec.describe Installation, type: :model do
     it 'deletes from index when destroyed' do
       installation = create(:installation)
 
-      expect(DeleteInstallationIndexJob).to receive(:perform_later).with(installation.uuid)
+      expect(DeleteInstallationIndexJob).to receive(:perform_later).with(installation.id, installation.uuid)
 
       installation.destroy
     end

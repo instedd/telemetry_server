@@ -36,6 +36,6 @@ class Installation < ActiveRecord::Base
   end
 
   def delete_from_index
-    DeleteInstallationIndexJob.perform_later self.uuid
+    DeleteInstallationIndexJob.perform_later self.id, self.uuid
   end
 end

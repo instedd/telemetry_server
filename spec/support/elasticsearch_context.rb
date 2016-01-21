@@ -28,4 +28,9 @@ RSpec.shared_context 'elasticseach', elasticseach: true do
     response = ElasticsearchService.client.search index: ElasticsearchService.index_name, type: 'installation', body: { query: { match_all: {} } }
     SearchResponse.new(response)
   end
+
+  def search_events(installation_uuid)
+    response = ElasticsearchService.client.search index: ElasticsearchService.index_name, body: { query: { match: {installation_uuid: installation_uuid} } }
+    SearchResponse.new(response)
+  end
 end
