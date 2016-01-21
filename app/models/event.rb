@@ -7,7 +7,7 @@ class Event < ActiveRecord::Base
 
   before_validation :ensure_period_span, on: :create
   after_save   :update_installation
-  after_commit :index_event
+  after_commit :index_event, on: [:create, :update]
 
   def parsed_data
     @parsed_data ||= JSON.parse(self.data).with_indifferent_access rescue {}

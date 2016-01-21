@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Installation, type: :model do
-  it { is_expected.to have_many(:events) }
+  it { is_expected.to have_many(:events).dependent(:delete_all) }
   it { is_expected.to validate_presence_of(:uuid) }
   it { is_expected.to validate_uniqueness_of(:uuid) }
 
@@ -47,6 +47,14 @@ RSpec.describe Installation, type: :model do
       expect(IndexInstallationJob).to receive(:perform_later)
       installation = create(:installation)
       installation.send :index_installation
+    end
+
+    it 'deletes from index when destroyed' do
+      installation = create(:installation)
+
+      expect(DeleteInstallationIndexJob).to receive(:perform_later).with(installation.uuid)
+
+      installation.destroy
     end
 
   end

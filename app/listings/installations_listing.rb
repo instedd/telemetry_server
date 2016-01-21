@@ -29,7 +29,8 @@ class InstallationsListing < Listings::Base
   end
 
   column nil, title: 'Actions' do |installation|
-    link_to 'Events', installation_events_path(installation)
+    link_to('Events', installation_events_path(installation)) + ' | ' +
+    link_to('Delete', installation, method: :delete, data: {confirm: 'Are you sure?'})
   end
 
   paginates_per 20

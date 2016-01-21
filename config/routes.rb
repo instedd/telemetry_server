@@ -9,7 +9,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :installations, only: [:index] do
+  resources :installations, only: [:index, :destroy] do
     resources :events, only: [:index] do
       member do
         get :errors

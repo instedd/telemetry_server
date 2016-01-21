@@ -1,11 +1,13 @@
 class Installation < ActiveRecord::Base
-  has_many :events
+  has_many :events, dependent: :delete_all
 
   validates :uuid, presence: true
   validates :uuid, uniqueness: true
 
-  after_commit :geocode
-  after_commit :index_installation
+  after_commit :geocode, on: [:create, :update]
+  after_commit :index_installation, on: [:create, :update]
+
+  after_destroy :delete_from_index
 
   def update_timestamps_from(event)
     self.last_reported_at = [self.last_reported_at, event.created_at].reject(&:nil?).max
@@ -31,5 +33,9 @@ class Installation < ActiveRecord::Base
 
   def index_installation
     IndexInstallationJob.perform_later(self.id)
+  end
+
+  def delete_from_index
+    DeleteInstallationIndexJob.perform_later self.uuid
   end
 end
