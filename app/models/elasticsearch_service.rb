@@ -20,10 +20,21 @@ class ElasticsearchService
       client.indices.put_mapping index: index_name, type: 'installation', body: {
         installation: {
           properties: {
-            location: {type: 'geo_point'}
+            location: {type: 'geo_point'},
+            uuid: {type: 'string', index: 'not_analyzed'}
           }
         }
       }
+
+      [:counter, :timespan, :set].each do |t|
+        client.indices.put_mapping index: "*", type: t, body: {
+          t => {
+            properties: {
+              installation_uuid: { type: 'string', index: 'not_analyzed' }
+            }
+          }
+        }
+      end
     end
 
     def create_index
