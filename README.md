@@ -7,7 +7,8 @@
 * Ruby 2.2.2
 * Bundler
 * PostgreSQL
-* ElasticSearch
+* ElasticSearch 2.1+
+* Kibana 4.3+
 
 ## Installation
 
@@ -15,6 +16,12 @@ Clone this repository and fetch the dependencies using bundler:
 
 ```
 bundle install
+```
+
+Initialize database:
+
+```
+bundle exec rake db:create db:schema:load db:seed
 ```
 
 Initialize the ElasticSearch index and mappings:
@@ -39,7 +46,7 @@ Before importing them, set up the following index patterns:
    * `telem*` with time-based events using the field `created_at`
 
 
-Some features of these dashboards may not work on old versions of ElasticSearch. Versions >= 1.7.1 should work fine.
+Some features of these dashboards may not work on old versions of ElasticSearch. Versions >= 2.1 should work fine.
 
 # License
 
