@@ -7,8 +7,8 @@
 * Ruby 2.2.2
 * Bundler
 * PostgreSQL
-* ElasticSearch 2.1+
-* Kibana 4.3+
+* ElasticSearch 2.3+
+* Kibana 4.5+ ([custom build](https://github.com/instedd/telemetry-kibana))
 
 ## Installation
 
@@ -34,6 +34,33 @@ Download the database needed to geocode IPs
 
 ```
 rake telemetry:geoip
+```
+
+### Docker development
+
+`docker-compose.yml` file build a development environment mounting the current folder and running rails in development environment.
+
+Run the following commands to have a stable development environment.
+
+```
+$ docker-compose run --rm --no-deps web bundle install
+$ ./on-web rake db:create db:schema:load db:seed
+$ ./on-web rake elasticsearch:init
+$ ./on-web rake telemetry:geoip
+$ docker-compose up
+```
+
+In order to create fake data:
+
+```
+$ ./on-web rake telemetry:fake_data
+```
+
+#### Cleanup
+
+```
+$ docker-compose rm -v -f
+$ docker volume rm $(docker volume ls -q | grep ^telemetryserver)
 ```
 
 ## Kibana Dashboards

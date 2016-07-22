@@ -1,42 +1,51 @@
-db:
-  image: postgres
-  volumes:
-    - '/var/lib/postgresql/data'
+version: '2.0'
 
-elasticsearch:
-  image: elasticsearch:2.1
-  command: elasticsearch -Des.network.host=0.0.0.0
-  volumes:
-    - '/usr/share/elasticsearch/data'
-  ports:
-    - 9200:9200
+services:
+  db:
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
 
-kibana:
-  image: instedd/telemetry-kibana:4.3
-  links:
-    - elasticsearch
-  ports:
-    - 5601:5601
+  elasticsearch:
+    image: elasticsearch:2.3
+    command: elasticsearch -Des.network.host=0.0.0.0
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
 
-redis:
-  image: redis
+  kibana:
+    image: instedd/telemetry-kibana:4.5
+    env_file: docker-dev.env
+    links:
+      - elasticsearch
 
-web:
-  build: .
-  links:
-    - db
-    - elasticsearch
-    - redis
-    - kibana
-  env_file: docker-dev.env
-  ports:
-    - 80:80
+  redis:
+    image: redis
 
-sidekiq:
-  build: .
-  command: bundle exec sidekiq
-  links:
-    - db
-    - elasticsearch
-    - redis
-  env_file: docker-dev.env
+  web:
+    extends:
+      file: docker-compose-base.yml
+      service: rails
+    command: bundle exec rails server -b 0.0.0.0
+    links:
+      - db
+      - redis
+      - elasticsearch
+      - kibana
+    ports:
+      - 3000:3000
+
+  sidekiq:
+    extends:
+      file: docker-compose-base.yml
+      service: rails
+    command: bundle exec sidekiq
+    links:
+      - db
+      - elasticsearch
+      - redis
+
+volumes:
+  db:
+  elastic:
+  redis:
+  bundle:
