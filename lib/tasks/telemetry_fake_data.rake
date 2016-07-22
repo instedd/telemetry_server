@@ -15,11 +15,17 @@ namespace :telemetry do
 
   ALL_COUNTRY_CODES = ['54', '1', '855', '84']
 
-  desc 'Creates and indexes fake data'
+  desc 'Removes all installation and events data'
+  task prune_data: :environment do
+    # Installation.where(application: 'resourcemap').destroy_all
+    Installation.destroy_all
+  end
+
+  desc 'Creates and indexes fake data for the last 10 months'
   task fake_data: :environment do
 
-    current_period = "2015-01-01T00:00:00:00".to_datetime
     last_period    = Time.now.utc.beginning_of_week
+    current_period = (last_period - 10.months).beginning_of_week
 
     init_state
 
@@ -32,12 +38,20 @@ namespace :telemetry do
   end
 
   def init_state
-    @instances = (1..8).map { FakeVerboiceInstance.new } + (1..8).map { FakeNuntiumInstance.new}
+    @instance_classes = [FakeVerboiceInstance, FakeNuntiumInstance, FakeResourcemapInstance]
+    initial_instances = 5
+
+    @instances = []
+    initial_instances.times {
+      @instance_classes.each { |instance_class|
+        @instances << instance_class.new
+      }
+    }
   end
 
   def advance_state
     @instances.each(&:advance_state)
-    rand(2).times { @instances << FakeVerboiceInstance.new; @instances << FakeNuntiumInstance.new } if rand(3) == 0
+    rand(2).times {@instance_classes.each { |instance_class| @instances << instance_class.new } } if rand(3) == 0
   end
 
   def record_stats(current_period)
@@ -96,7 +110,7 @@ namespace :telemetry do
         unique_phone_numbers_per_country_code,
         ao_count,
         at_count,
-        active_channels,
+        active_channels_by_type,
         channels_by_kind
       ]
 
@@ -142,15 +156,15 @@ namespace :telemetry do
       }
     end
 
-    def active_channels
+    def active_channels_by_type
       {
-        "counters" => [
+        "counters" => %w(twilio voxeo custom custom_sip).map { |type|
           {
-            "metric" => "active_channels",
-            "key" => {},
+            "metric" => "active_channels_by_type",
+            "key" => { "type" => type },
             "value" => rand(30)
           }
-        ]
+        }
       }
     end
 
@@ -384,4 +398,84 @@ namespace :telemetry do
 
   end
 
+  class FakeResourcemapInstance < FakeInstance
+    def initialize
+      super
+      @application = 'resourcemap'
+      @collections = []
+      @next_collection_id = 0
+    end
+
+    def new_collection_id
+      @next_collection_id += 1
+    end
+
+    def current_stats(period)
+      all_stats = [
+        activities_by_collection,
+      ]
+
+      build_event(all_stats, period)
+    end
+
+    def advance_state
+      @collections.each(&:advance_state)
+      rand(2).times { create_collection }
+    end
+
+    def create_collection
+      @collections << FakeCollection.new(self)
+    end
+
+    def activities_by_collection
+      {
+        "counters" => @collections.map { |c|
+        { "metric" => "activities", "key" => { "collection_id" => c.id }, "value" => c.activities}
+        }
+      }
+    end
+
+    class FakeCollection
+      attr_reader :id
+
+      def initialize(instance)
+        @instance = instance
+        @id = instance.new_collection_id
+        @activities = PositiveIntegerRandomGaussian.new(rand(20), rand(5))
+      end
+
+      def advance_state
+      end
+
+      def activities
+        @activities.rand
+      end
+    end
+  end
+
+  # based on http://stackoverflow.com/a/9266488/30948
+  # a normal distribution helper to generate positive integers numbers
+  # useful to define generators that will lead to simulations of heavy used instances and low used instance
+  # instead of uniform random activities metrics
+  class PositiveIntegerRandomGaussian
+    def initialize(mean = 0.0, sd = 1.0, rng = lambda { Kernel.rand })
+      @mean, @sd, @rng = mean, sd, rng
+      @compute_next_pair = false
+    end
+
+    def rand
+      res = if (@compute_next_pair = !@compute_next_pair)
+        # Compute a pair of random values with normal distribution.
+        # See http://en.wikipedia.org/wiki/Box-Muller_transform
+        theta = 2 * Math::PI * @rng.call
+        scale = @sd * Math.sqrt(-2 * Math.log(1 - @rng.call))
+        @g1 = @mean + scale * Math.sin(theta)
+        @g0 = @mean + scale * Math.cos(theta)
+      else
+        @g1
+      end
+
+      [res, 0].max
+    end
+  end
 end
