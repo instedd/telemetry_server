@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   end
 
   resources :installations, only: [:index, :destroy] do
+    resources :tags, only: [:create, :destroy], controller: 'installation_tags'
+
     resources :events, only: [:index] do
       member do
         get :errors

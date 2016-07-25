@@ -1,5 +1,6 @@
 class Installation < ActiveRecord::Base
   has_many :events, dependent: :delete_all
+  acts_as_taggable
 
   validates :uuid, presence: true
   validates :uuid, uniqueness: true

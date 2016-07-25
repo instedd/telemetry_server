@@ -1,0 +1,42 @@
+@import 'bootstrap-sprockets';
+@import 'bootstrap';
+@import 'listings';
+@import 'signin';
+@import 'dashboard';
+
+// tags control in installations listings
+.show-on-hover {
+  visibility: hidden;
+}
+tr:hover .show-on-hover {
+  visibility: visible
+}
+
+.tags-input {
+  display: inline-block;
+  margin-left: 5px;
+  margin-bottom: 0px;
+
+  li {
+    padding-right: 0;
+    padding-left: 0;
+    .glyphicon-tag {
+      color: #5bc0de;
+      top: 3px;
+    }
+    .label {
+      font-weight: normal;
+    }
+    a {
+      visibility: hidden;
+      color: white;
+    }
+    &:hover a {
+      visibility: visible;
+      &:hover {
+        color: #ccc;
+        text-decoration: none;
+      }
+    }
+  }
+}

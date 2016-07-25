@@ -1,11 +1,13 @@
 class InstallationsListing < Listings::Base
-  model Installation
+  model { Installation.includes(:tags) }
 
   layout filters: :top
 
   filter :application
 
-  column :application, searchable: true
+  column :application, searchable: true do |installation|
+    render partial: 'listings/application_with_tags', locals: { installation: installation }
+  end
   column :admin_email, searchable: true
   column :ip, title: 'IP'
   column :uuid, title: 'UUID', searchable: true

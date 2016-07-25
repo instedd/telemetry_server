@@ -20,6 +20,7 @@ gem 'bootstrap-sass'
 gem 'listings'
 gem 'sinatra', :require => nil
 gem 'rack-proxy'
+gem 'acts-as-taggable-on'
 
 group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]

@@ -1,0 +1,14 @@
+= installation.application
+
+%ul.list-inline.list-unstyled.tags-input
+  %li{class: "#{'show-on-hover' if installation.tags.length == 0}"}
+    %span.glyphicon.glyphicon-tag
+  - installation.tags.each do |tag|
+    %li
+      %span.label.label-info
+        = tag
+        = link_to 'x', installation_tag_path(installation, tag.to_s), method: 'delete', remote: true
+
+  %li.show-on-hover
+    = form_tag installation_tags_path(installation), remote: true do |f|
+      = text_field_tag :name, '', class: "form-control input-sm", placeholder: "add tag"
