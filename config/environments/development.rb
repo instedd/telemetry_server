@@ -41,4 +41,7 @@ Rails.application.configure do
 
   # Setup Action Mailer
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+  # whitelist all ips for web_console in development mode (so it works in docker development)
+  config.web_console.whitelisted_ips = '127.0.0.1/0.0.0.0'
 end
