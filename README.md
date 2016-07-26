@@ -56,6 +56,15 @@ In order to create fake data:
 $ ./on-web rake telemetry:fake_data
 ```
 
+To setup and run test, once the web container is running:
+
+```
+$ docker exec -it resourcemap_web_1 bash
+root@45ccfa697a3a:/app# RAILS_ENV=test rake db:create db:schema:load
+$ ./on-web rake
+$ ./on-web rake spec SPEC=spec/models/user_spec.rb
+```
+
 #### Cleanup
 
 ```

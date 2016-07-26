@@ -26,6 +26,7 @@ group :development, :test do
   gem 'pry-byebug' unless ENV["TRAVIS"]
   gem 'rspec-rails', '~> 3.0'
   gem 'factory_girl_rails'
+  gem 'faker'
 end
 
 group :development do
@@ -39,7 +40,6 @@ end
 
 group :test do
   gem 'shoulda-matchers'
-  gem 'faker'
   gem 'webmock'
   gem 'timecop'
 end
