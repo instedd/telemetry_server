@@ -21,7 +21,8 @@ class ElasticsearchService
         installation: {
           properties: {
             location: {type: 'geo_point'},
-            uuid: {type: 'string', index: 'not_analyzed'}
+            uuid: {type: 'string', index: 'not_analyzed'},
+            application: { type: 'string', index: 'not_analyzed' }
           }
         }
       }
@@ -30,7 +31,8 @@ class ElasticsearchService
         client.indices.put_mapping index: "*", type: t, body: {
           t => {
             properties: {
-              installation_uuid: { type: 'string', index: 'not_analyzed' }
+              installation_uuid: { type: 'string', index: 'not_analyzed' },
+              application: { type: 'string', index: 'not_analyzed' }
             }
           }
         }
