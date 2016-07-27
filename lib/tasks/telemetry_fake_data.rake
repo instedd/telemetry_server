@@ -96,6 +96,70 @@ namespace :telemetry do
     end
   end
 
+  module FakeUserContainer
+    extend ActiveSupport::Concern
+
+    included do
+      attr_reader :users
+
+      def users_container_init
+        @user_id_seq = 0
+        @users = []
+      end
+
+      def users_container_advance_state
+        @users.each(&:advance_state)
+      end
+
+      def create_user
+        @users << build_user
+      end
+
+      def new_user_id
+        @user_id_seq+=1
+      end
+
+      def build_user
+        raise "should implement"
+      end
+
+      def user_lifespan_stats
+        {
+          "timespans" => @users.map { |user|
+            {
+              "metric" => "account_lifespan",
+              "key" => { "user_id" => user.id },
+              "days" => user.lifespan
+            }
+          }
+        }
+      end
+
+      def number_of_accounts_stats
+        {
+          "counters" => [
+            { "metric" => "accounts", "key" => { }, "value" => @users.length }
+          ]
+        }
+      end
+    end
+
+    class BaseUser
+      attr_reader :id
+      attr_reader :lifespan
+
+      def initialize(instance)
+        @id = instance.new_user_id
+        @instance = instance
+        @lifespan = rand(10)
+      end
+
+      def advance_state
+        @lifespan += rand(14)
+      end
+    end
+  end
+
   class FakeNuntiumInstance < FakeInstance
     def initialize
       super
@@ -182,22 +246,19 @@ namespace :telemetry do
   end
 
   class FakeVerboiceInstance < FakeInstance
+    include FakeUserContainer
 
     def initialize
       super
       @application = 'verboice'
-      @user_id_seq = 0
       @project_id_seq = 0
       @call_flow_id_seq = 0
-      @users = (1..10).map { create_user }
+      users_container_init
+      10.times { create_user }
     end
 
-    def create_user
+    def build_user
       FakeUser.new(self)
-    end
-
-    def new_user_id
-      @user_id_seq+=1
     end
 
     def new_project_id
@@ -211,6 +272,7 @@ namespace :telemetry do
     def current_stats(period)
       all_stats = [
         user_lifespan_stats,
+        number_of_accounts_stats,
         call_flows_per_project_stats,
         languages_per_project_stats,
         project_count_stats,
@@ -262,18 +324,6 @@ namespace :telemetry do
       }
     end
 
-    def user_lifespan_stats
-      {
-        "timespans" => @users.map { |user|
-          {
-            "metric" => "account_lifespan",
-            "key" => { "user_id" => user.id },
-            "days" => user.lifespan
-          }
-        }
-      }
-    end
-
     def project_lifespan_stats
       {
         "timespans" => all_projects.map { |project|
@@ -317,101 +367,106 @@ namespace :telemetry do
     end
 
     def advance_state
-      @users.each(&:advance_state)
-      rand(4).times { @users << create_user }
+      users_container_advance_state
+      rand(4).times { create_user }
     end
 
-  end
+    class FakeUser < FakeUserContainer::BaseUser
+      attr_reader :projects
 
-  class FakeUser
-    attr_reader :id
-    attr_reader :projects
-    attr_reader :lifespan
+      def initialize(instance)
+        super
+        @projects = []
+        rand(2).times { create_project }
+      end
 
-    def initialize(instance)
-      @id = instance.new_user_id
-      @instance = instance
-      @projects = (0..rand(2)).map { create_project }
-      @lifespan = rand(10)
+      def create_project
+        @projects << FakeProject.new(@instance, self)
+      end
+
+      def advance_state
+        super
+        @projects.each(&:advance_state)
+        rand(1).times { create_project }
+      end
     end
 
-    def create_project
-      FakeProject.new(@instance, self)
-    end
+    class FakeProject
 
-    def advance_state
-      @lifespan += rand(14)
-      @projects.each(&:advance_state)
-      rand(1).times { @projects << create_project }
-    end
+      attr_reader :id
+      attr_reader :languages
+      attr_reader :call_flows
+      attr_reader :channels
+      attr_reader :lifespan
 
-  end
+      def initialize(instance, user)
+        @instance = instance
+        @user = user
 
-  class FakeProject
+        @id = instance.new_project_id
+        @languages = ALL_LANGUAGES.sample(1 + rand(2))
+        @call_flows = []
+        rand(5).times { create_flow }
+        @channels = rand(@call_flows.length * 1.5)
+        @lifespan = rand(5)
+      end
 
-    attr_reader :id
-    attr_reader :languages
-    attr_reader :call_flows
-    attr_reader :channels
-    attr_reader :lifespan
+      def create_flow
+        @call_flows << {
+          id: (@instance.new_call_flow_id),
+          step_count: 1 + rand(20)
+        }
+      end
 
-    def initialize(instance, user)
-      @instance = instance
-      @user = user
-
-      @id = instance.new_project_id
-      @languages = ALL_LANGUAGES.sample(1 + rand(2))
-      @call_flows = (0..rand(5)).map { create_flow }
-      @channels = rand(@call_flows.length * 1.5)
-      @lifespan = rand(5)
-    end
-
-    def create_flow
-      {
-        id: (@instance.new_call_flow_id),
-        step_count: 1 + rand(20)
-      }
-    end
-
-    def call_logs
-      (0..channels).flat_map do |channel|
-        (0..rand(3)).map do
-          {
-            channel_id: channel,
-            date: (Date.today - rand(7)).iso8601,
-            state: ["completed", "failed"].sample
-          }
+      def call_logs
+        (0..channels).flat_map do |channel|
+          (0..rand(3)).map do
+            {
+              channel_id: channel,
+              date: (Date.today - rand(7)).iso8601,
+              state: ["completed", "failed"].sample
+            }
+          end
         end
       end
-    end
 
-    def advance_state
-      @lifespan += rand(14)
+      def advance_state
+        @lifespan += rand(14)
 
-      call_flows.each do |flow|
-        languages.concat(ALL_LANGUAGES.sample(1)).uniq! if rand(30) == 0
-        flow[:step_count] += rand(2)
+        call_flows.each do |flow|
+          languages.concat(ALL_LANGUAGES.sample(1)).uniq! if rand(30) == 0
+          flow[:step_count] += rand(2)
+        end
+
+        @channels += rand(3)
       end
 
-      @channels += rand(3)
     end
-
   end
 
   class FakeResourcemapInstance < FakeInstance
+    include FakeUserContainer
+
     def initialize
       super
       @application = 'resourcemap'
+      users_container_init
       @collections = []
-      @next_collection_id = 0
+      @collection_id_seq = 0
+    end
+
+    def build_user
+      FakeUser.new(self)
     end
 
     def new_collection_id
-      @next_collection_id += 1
+      @collection_id_seq += 1
     end
 
     def current_stats(period)
       all_stats = [
+        user_lifespan_stats,
+        number_of_accounts_stats,
         activities_by_collection,
       ]
 
@@ -419,7 +474,8 @@ namespace :telemetry do
     end
 
     def advance_state
-      @collections.each(&:advance_state)
+      rand(4).times { create_user }
+      users_container_advance_state
       rand(2).times { create_collection }
     end
 
@@ -433,6 +489,16 @@ namespace :telemetry do
         { "metric" => "activities", "key" => { "collection_id" => c.id }, "value" => c.activities}
         }
       }
+    end
+
+    class FakeUser < FakeUserContainer::BaseUser
+      def initialize(instance)
+        super
+      end
+
+      def advance_state
+        super
+      end
     end
 
     class FakeCollection
