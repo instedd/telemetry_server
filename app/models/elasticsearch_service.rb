@@ -28,11 +28,12 @@ class ElasticsearchService
       }
 
       [:counter, :timespan, :set].each do |t|
-        client.indices.put_mapping index: "*", type: t, body: {
+        client.indices.put_mapping index: index_name, type: t, body: {
           t => {
             properties: {
               installation_uuid: { type: 'string', index: 'not_analyzed' },
-              application: { type: 'string', index: 'not_analyzed' }
+              application: { type: 'string', index: 'not_analyzed' },
+              metric: { type: 'string', index: 'not_analyzed' }
             }
           }
         }
