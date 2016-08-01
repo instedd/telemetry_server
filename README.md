@@ -81,8 +81,15 @@ Before importing them, set up the following index patterns:
    * `telemetry*` with time-based events using the field `beginning`
    * `telem*` with time-based events using the field `created_at`
 
+Events with `created_at` corresponds to `installation` events, so they serve to ananlyze instaces stateless metric, like lat*lng, number of instances, number of applications.
 
-Some features of these dashboards may not work on old versions of ElasticSearch. Versions >= 2.1 should work fine.
+All other events will have a `beginning` field since they are bounded to a period.
+
+Visualizations that show evolution through the time are easy to build form `telemetry*` index pattern.
+
+If a metric is needed to, for example count the number of accounts, showing only the last known number, then a filter on the metric should be added: `metric:accounts AND beginning:[now-2w TO now]`. This works since the reporting period of all instances is 2 weeks long (yet in staging environment is 3 days). Notice that these widgets won't be affected by the general time filter of the dashboard (ie: last 5 years). Kibana's limitation to perform aggregations and grouping on visualization is forcing this workaround.
+
+Some features of these dashboards may not work on old versions of ElasticSearch. Versions >= 2.3 should work fine.
 
 # License
 
