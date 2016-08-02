@@ -19,4 +19,10 @@ RSpec.describe EventMigrator, type: :model do
       { 'metric' => 'numbers_by_application_and_country', 'key' => { 'application_id' => 42, 'country_code' => '54' }, 'value' => 38 },
       { 'metric' => 'unique_phone_numbers_by_project_and_country', 'key' => { 'project_id' => 42, 'country_code' => '54' }, 'value' => 38 })
   end
+
+  it "migrates verboices callers" do
+    migrate_counter(
+      { 'metric' => 'callers', 'key' => { 'project_id' => 42, 'country_code' => '54' }, 'value' => 38 },
+      { 'metric' => 'unique_phone_numbers_by_project_and_country', 'key' => { 'project_id' => 42, 'country_code' => '54' }, 'value' => 38 })
+  end
 end

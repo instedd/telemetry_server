@@ -8,6 +8,8 @@ class EventMigrator
     when 'numbers_by_application_and_country'
       counter['metric'] =  'unique_phone_numbers_by_project_and_country'
       move counter['key'], 'application_id', 'project_id'
+    when 'callers'
+      counter['metric'] =  'unique_phone_numbers_by_project_and_country'
     end
   end
 
