@@ -1,6 +1,7 @@
 class EventIndexer
   def initialize
     @client = ElasticsearchService.client
+    @migrator = EventMigrator.new
   end
 
   def index(event)
@@ -25,6 +26,9 @@ class EventIndexer
     bulk_data = []
 
     counters.each_with_index do |counter, i|
+
+      @migrator.migrate_counter counter
+
       bulk_data.push({index: {_type: 'counter', _id: "#{event.id}-#{i}"}})
       bulk_data.push({
         installation_uuid: event.installation.uuid,
