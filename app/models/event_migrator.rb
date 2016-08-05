@@ -5,11 +5,15 @@ class EventMigrator
 
   def migrate_counter(counter)
     case counter['metric']
-    when 'numbers_by_application_and_country'
+    when 'numbers_by_application_and_country' # mbuilder
       counter['metric'] =  'unique_phone_numbers_by_project_and_country'
       move counter['key'], 'application_id', 'project_id'
-    when 'callers'
+    when 'callers' # verboice
       counter['metric'] =  'unique_phone_numbers_by_project_and_country'
+    when 'numbers_by_country_code' # pollit
+      counter['metric'] = 'unique_phone_numbers_by_country'
+    when 'phone_numbers' # remindem
+      counter['metric'] = 'unique_phone_numbers_by_country'
     end
   end
 
