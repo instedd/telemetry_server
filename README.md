@@ -44,7 +44,9 @@ Run the following commands to have a stable development environment.
 
 ```
 $ docker-compose run --rm --no-deps web bundle install
-$ ./on-web rake db:create db:schema:load db:seed
+$ docker-compose run --rm web bash
+root@web_1 $ RAILS_ENV=development rake db:setup
+root@web_1 $ RAILS_ENV=test rake db:setup
 $ ./on-web rake elasticsearch:init
 $ ./on-web rake telemetry:geoip
 $ docker-compose up
@@ -59,10 +61,8 @@ $ ./on-web rake telemetry:fake_data
 To setup and run test, once the web container is running:
 
 ```
-$ docker exec -it resourcemap_web_1 bash
-root@45ccfa697a3a:/app# RAILS_ENV=test rake db:create db:schema:load
-$ ./on-web rake
-$ ./on-web rake spec SPEC=spec/models/user_spec.rb
+$ docker-compose exec web bash
+root@web_1 $ rake
 ```
 
 #### Cleanup

@@ -21,28 +21,28 @@ services:
   redis:
     image: redis
 
-  web:
-    extends:
-      file: docker-compose-base.yml
-      service: rails
-    command: bundle exec rails server -b 0.0.0.0
-    links:
+  web: &rails
+    image: instedd/nginx-rails:2.2
+    env_file: docker-dev.env
+    environment:
+      RAILS_ENV:
+    pid: host
+    volumes:
+      - .:/app
+      - bundle:/usr/local/bundle
+    depends_on:
       - db
       - redis
       - elasticsearch
       - kibana
+    command: rails server -b 0.0.0.0
     ports:
       - 3000:3000
 
   sidekiq:
-    extends:
-      file: docker-compose-base.yml
-      service: rails
-    command: bundle exec sidekiq
-    links:
-      - db
-      - elasticsearch
-      - redis
+    <<: *rails
+    command: sidekiq
+    ports: []
 
 volumes:
   db:
