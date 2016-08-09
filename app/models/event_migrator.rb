@@ -10,7 +10,7 @@ class EventMigrator
       move counter['key'], 'application_id', 'project_id'
     when 'callers' # verboice
       counter['metric'] =  'unique_phone_numbers_by_project_and_country'
-    when 'numbers_by_country_code' # pollit
+    when 'numbers_by_country_code' # pollit & nuntium
       counter['metric'] = 'unique_phone_numbers_by_country'
     when 'phone_numbers' # remindem
       counter['metric'] = 'unique_phone_numbers_by_country'
