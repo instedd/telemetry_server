@@ -8,7 +8,7 @@ class EventIndexer
     data = event.parsed_data
 
     period = data['period']
-    application = data['application'] || event.installation.application
+    application = event.installation.application || data['application']
     counters = data['counters'] || []
     sets = data['sets'] || []
     timespans = data['timespans'] || []

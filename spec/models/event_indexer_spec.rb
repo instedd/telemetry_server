@@ -131,6 +131,28 @@ RSpec.describe EventIndexer, type: :model, elasticseach: true do
     expect(response.results.first['application']).to eq('nuntium')
   end
 
+  it 'should use installation name' do
+    data = {
+      counters: [
+        {metric: 'active_channels', key: {}, value: 37}
+      ],
+      period: {beginning: from.iso8601, end: to.iso8601},
+      application: 'other'
+    }.to_json
+
+    installation = build(:installation, application: 'verboice')
+    event = build(:event, installation: installation, data: data)
+
+    indexer.index(event)
+
+    refresh_index
+
+    response = search_counters
+
+    expect(response.total).to eq(1)
+    expect(response.results.first['application']).to eq('verboice')
+  end
+
   it "does not fail on events without data" do
     data = { period: {beginning: from.iso8601, end: to.iso8601}, counters: [], sets: [], timespans: [] }.to_json
     event = build(:event, installation: installation, data: data)
